@@ -1,0 +1,17 @@
+python3 -m venv venv
+source venv/bin/activate
+
+1. Install Python (if needed)
+brew install python@3.11
+
+2. Install Ollama
+brew install ollama
+
+3. Start Ollama service
+ollama serve
+
+4. Pull the model
+ollama pull phi3:mini
+
+5. Test run
+ollama run phi3:mini "Hello"
