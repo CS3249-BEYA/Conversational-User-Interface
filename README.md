@@ -73,24 +73,3 @@ Quick steps:
 * If connection fails, check port `11434` is free
 * Re-pull model if necessary (`ollama rm phi3:medium && ollama pull phi3:medium`)
 
----
-
-## Contributing
-
-Contributions are welcome! You can help by:
-
-* Improving the frontend UI
-* Adding more examples or cultural notes
-* Optimizing chatbot prompts for better learning
-
----
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-## Contact
-
-For questions or support, open an issue or contact the maintainer.
