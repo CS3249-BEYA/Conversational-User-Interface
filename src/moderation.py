@@ -28,17 +28,18 @@ class ModerationResult:
     tags: List[str]  # Policy tags that were triggered
     reason: str  # Human-readable explanation
     confidence: float  # Confidence level (0-1)
-    fallback_response: Optional[str] = None  # Response to use if action != ALLOW
+    # Response to use if action != ALLOW
+    fallback_response: Optional[str] = None
 
 
 class Moderator:
     """Handles content moderation according to safety policy."""
-    
+
     def __init__(self):
         """Initialize the moderator with safety rules."""
         self.safety_mode = SAFETY_MODE
         self._initialize_rules()
-    
+
     def _initialize_rules(self):
         """
         Initialize moderation rules based on POLICY.md.
@@ -49,7 +50,7 @@ class Moderator:
         2. Ensure Python formatting (lists, strings, regex compilation)
         3. Templates should be multi-line strings with proper formatting
         """
-        
+
         # TODO: Define crisis keywords and patterns
         # These should detect immediate risk of harm
         self.crisis_keywords = [
@@ -62,7 +63,7 @@ class Moderator:
             # Emotional crisis expressions:
             "hopeless", "worthless", "can't take it", "don't see the point", "at my wit's end", "giving up"
         ]
-        
+
         # TODO: Crisis patterns - regex for complex expressions
         self.crisis_patterns = [
             r"\b(want|going|plan|ready) to (die|kill|hurt|end)\b",
@@ -74,7 +75,7 @@ class Moderator:
             r"\b(what's|what is) the point of living\b",
             r"\b(going to|gonna) (hurt myself|self-harm|end it)\b"
         ]
-        
+
         # TODO: Define medical request patterns
         self.medical_keywords = [
             # Diagnosis requests:
@@ -86,7 +87,7 @@ class Moderator:
             # Other:
             "psychiatrist recommendation", "doctor's advice", "medical advice"
         ]
-        
+
         # TODO: Medical patterns - regex for complex expressions
         self.medical_patterns = [
             r"\b(prescribe|recommend|suggest) (medication|pills|drugs)\b",
@@ -98,7 +99,7 @@ class Moderator:
             r"\bwhat are the side effects of\b",
             r"\bwhere can i find a psychiatrist\b"
         ]
-        
+
         # TODO: Define harmful content patterns
         self.harmful_content = {
             "violence": [
@@ -111,7 +112,7 @@ class Moderator:
                 "hate speech", "discriminate", "harass", "bully", "stalk", "doxxing", "threaten to expose", "insult"
             ]
         }
-        
+
         # TODO: Define confidence thresholds based on safety mode
         self.confidence_thresholds = {
             "strict": {
@@ -130,7 +131,7 @@ class Moderator:
                 "harmful": 0.95,
             }
         }
-        
+
         # TODO: Define safety fallback templates
         # Copy complete templates from POLICY.md
         self.fallback_templates = {
@@ -182,7 +183,6 @@ Your wellbeing is important. How can I support you today?
             """,
         }
 
-    
     def moderate(
         self,
         user_prompt: str,
@@ -203,7 +203,7 @@ Your wellbeing is important. How can I support you today?
         2. Check medical (prevent harmful advice)
         3. Check harmful content (filter inappropriate)
         """
-        
+
         # Step 1: Check for crisis indicators (highest priority)
         crisis_check = self._check_crisis(user_prompt)
         if crisis_check.action != ModerationAction.ALLOW:
@@ -243,7 +243,7 @@ Your wellbeing is important. How can I support you today?
             reason="Content passes all safety checks",
             confidence=1.0,
         )
-    
+
     def _check_crisis(self, text: str) -> ModerationResult:
         """
         Check for crisis indicators.
@@ -253,17 +253,17 @@ Your wellbeing is important. How can I support you today?
         ALGORITHM:
         1. Convert text to lowercase
         2. Check against crisis_keywords:
-           - If found, set confidence = 0.7
-           - Track which keywords were found
+            - If found, set confidence = 0.7
+            - Track which keywords were found
         3. Check against crisis_patterns:
-           - If matched, set confidence = 0.8-0.9
-           - Use re.search() for each pattern
+            - If matched, set confidence = 0.8-0.9
+            - Use re.search() for each pattern
         4. If multiple matches, use MAXIMUM confidence
         5. Get threshold for current safety_mode
         6. If confidence >= threshold:
-           - Return BLOCK action
-           - Include crisis fallback_response
-           - Add descriptive tags
+            - Return BLOCK action
+            - Include crisis fallback_response
+            - Add descriptive tags
         7. Otherwise return ALLOW
         """
 
@@ -283,7 +283,7 @@ Your wellbeing is important. How can I support you today?
                 confidence = max(confidence, 0.9)
                 detected_tags.append(f"crisis_pattern:{pattern}")
 
-        crisis_threshold = self.confidence_thresholds[self.safety_mode.value]["crisis"]
+        crisis_threshold = self.confidence_thresholds[self.safety_mode]["crisis"]
 
         if confidence >= crisis_threshold:
             return ModerationResult(
@@ -300,7 +300,7 @@ Your wellbeing is important. How can I support you today?
             reason="No crisis indicators detected",
             confidence=confidence,
         )
-    
+
     def _check_medical(self, text: str) -> ModerationResult:
         """
         Check for medical requests.
@@ -333,7 +333,8 @@ Your wellbeing is important. How can I support you today?
                 confidence = max(confidence, 0.85)
                 detected_tags.append(f"medical_pattern:{pattern}")
 
-        medical_threshold = self.confidence_thresholds[self.safety_mode.value]["medical"]
+        # FIXED LINE: Removed .value
+        medical_threshold = self.confidence_thresholds[self.safety_mode]["medical"]
 
         if confidence >= medical_threshold:
             return ModerationResult(
@@ -350,7 +351,7 @@ Your wellbeing is important. How can I support you today?
             reason="No medical requests detected",
             confidence=confidence,
         )
-    
+
     def _check_harmful(self, text: str) -> ModerationResult:
         """
         Check for harmful content.
@@ -360,8 +361,8 @@ Your wellbeing is important. How can I support you today?
         ALGORITHM:
         1. Convert text to lowercase
         2. For each category in harmful_content:
-           - Check if any keywords present
-           - Track which categories triggered
+            - Check if any keywords present
+            - Track which categories triggered
         3. Set confidence = 0.75 for any match
         4. Compare against threshold
         5. Return BLOCK if threshold exceeded
@@ -380,7 +381,8 @@ Your wellbeing is important. How can I support you today?
                     detected_tags.append(
                         f"harmful:{category}_keyword:{keyword}")
 
-        harmful_threshold = self.confidence_thresholds[self.safety_mode.value]["harmful"]
+        # FIXED LINE: Removed .value
+        harmful_threshold = self.confidence_thresholds[self.safety_mode]["harmful"]
 
         if confidence >= harmful_threshold:
             return ModerationResult(
@@ -397,7 +399,7 @@ Your wellbeing is important. How can I support you today?
             reason="No harmful content detected",
             confidence=confidence,
         )
-    
+
     def _check_model_output(self, response: str) -> ModerationResult:
         """
         Check model output for policy violations.
@@ -431,9 +433,9 @@ Your wellbeing is important. How can I support you today?
             reason="Model output is appropriate",
             confidence=1.0,
         )
-    
+
     def _check_context_patterns(self, context: List[Dict]) -> ModerationResult:
-        
+
         # Check for escalation
         crisis_count = 0
         for turn in context:
@@ -442,7 +444,7 @@ Your wellbeing is important. How can I support you today?
                 for keyword in self.crisis_keywords:
                     if keyword in content:
                         crisis_count += 1
-        
+
         if crisis_count >= 3:
             return ModerationResult(
                 action=ModerationAction.SAFE_FALLBACK,
@@ -451,20 +453,22 @@ Your wellbeing is important. How can I support you today?
                 confidence=0.8,
                 fallback_response=self.fallback_templates["crisis"],
             )
-        
+
         return ModerationResult(
             action=ModerationAction.ALLOW,
             tags=[],
             reason="Conversation pattern is safe",
             confidence=1.0,
         )
-    
+
     def get_disclaimer(self) -> str:
         """Get initial disclaimer."""
         return self.fallback_templates.get("disclaimer", "")
 
+
 # Singleton instance
 _moderator_instance = None
+
 
 def get_moderator() -> Moderator:
     """Get singleton moderator instance."""

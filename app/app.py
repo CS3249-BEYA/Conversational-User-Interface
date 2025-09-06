@@ -101,7 +101,7 @@ HTML_TEMPLATE = """
         <!-- Input Area -->
         <div class="p-4 bg-gray-50 border-t border-gray-200 flex items-center">
             <input id="user-input" type="text" placeholder="Type your message..."
-                   class="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
+                    class="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
             <button id="send-button"
                     class="ml-4 p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200 shadow-md">
                 Send
@@ -174,14 +174,9 @@ HTML_TEMPLATE = """
                 // Determine message type based on safety_action
                 let messageType = 'assistant-message';
                 if (data.safety_action === 'block') {
-                    messageType = 'message-box blocked-message';
+                    messageType = 'blocked-message';
                 } else if (data.safety_action === 'safe_fallback') {
-                    messageType = 'message-box safe-fallback-message';
-                }
-                
-                // The disclaimer is part of the first response, handle it
-                if (data.disclaimer) {
-                    appendMessage(data.disclaimer, 'disclaimer-message');
+                    messageType = 'safe-fallback-message';
                 }
                 
                 appendMessage(data.response, messageType);
@@ -235,26 +230,32 @@ def home():
 @app.route("/disclaimer")
 def disclaimer():
     """Returns the initial disclaimer text."""
-    return jsonify({"disclaimer": chat_engine.moderator.get_disclaimer()})
+    try:
+        disclaimer_text = chat_engine.moderator.get_disclaimer()
+        return jsonify({"disclaimer": disclaimer_text})
+    except Exception as e:
+        print(f"Error getting disclaimer: {e}")
+        return jsonify({"disclaimer": "An error occurred fetching the disclaimer."}), 500
 
 
 @app.route("/chat", methods=["POST"])
 def chat():
     """Handles the chat message processing."""
-    data = request.get_json()
-    user_prompt = data.get("prompt", "")
+    try:
+        data = request.get_json()
+        if not data or 'prompt' not in data:
+            return jsonify({"response": "Invalid request. Please provide a prompt.", "safety_action": "allow"}), 400
 
-    if not user_prompt:
-        return jsonify({"response": "Please enter a message.", "safety_action": "allow"}), 400
+        user_prompt = data.get("prompt", "")
+        if not user_prompt.strip():
+            return jsonify({"response": "Please enter a message.", "safety_action": "allow"}), 400
 
-    response_data = chat_engine.process_message(user_prompt)
-
-    # Check if this is the first interaction to include the disclaimer
-    if chat_engine.turn_count == 1:
-      disclaimer_text = chat_engine.moderator.get_disclaimer()
-      response_data["disclaimer"] = disclaimer_text
-
-    return jsonify(response_data)
+        response_data = chat_engine.process_message(user_prompt)
+        return jsonify(response_data)
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error processing chat message: {e}")
+        return jsonify({"response": "An error occurred. Please try again later.", "safety_action": "block"}), 500
 
 
 if __name__ == "__main__":
