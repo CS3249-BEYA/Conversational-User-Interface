@@ -1,12 +1,6 @@
-"""
-Chat engine module - orchestrates conversation flow with safety checks.
-Students must complete TODO sections to implement safe conversation management.
-"""
-
-import json
 import logging
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from .config import (
     SYSTEM_PROMPT,

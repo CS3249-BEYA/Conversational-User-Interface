@@ -1,6 +1,6 @@
 from src.chat_engine import get_engine
 import json
-from flask import Flask, render_template_string, request, jsonify
+from flask import Flask, request, jsonify
 import sys
 import os
 
@@ -16,13 +16,13 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psychological Pre-consultation Chatbot</title>
+    <title>Language Learning Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f9fafb;
             transition: background-color 0.3s ease;
         }
         .chat-container {
@@ -34,13 +34,13 @@ HTML_TEMPLATE = """
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             background-color: #ffffff;
             overflow: hidden;
-            transition: box-shadow 0.3s ease;
         }
         .chat-header {
-            background-color: #e2e8f0;
+            background-color: #2563eb;
             padding: 1.5rem;
-            border-bottom: 1px solid #cbd5e1;
+            border-bottom: 1px solid #1e40af;
             text-align: center;
+            color: white;
         }
         .chat-messages {
             flex-grow: 1;
@@ -67,16 +67,15 @@ HTML_TEMPLATE = """
             word-wrap: break-word;
             white-space: pre-wrap;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .user-message {
-            background-color: #d1e7dd;
-            color: #0c6114;
+            background-color: #dbeafe;
+            color: #1e40af;
             border-bottom-right-radius: 0.5rem;
         }
         .assistant-message {
-            background-color: #e2e8f0;
-            color: #4a5568;
+            background-color: #f1f5f9;
+            color: #334155;
             border-bottom-left-radius: 0.5rem;
         }
         .disclaimer-message, .blocked-message, .safe-fallback-message {
@@ -94,14 +93,14 @@ HTML_TEMPLATE = """
             border-color: #ffecb5;
         }
         .blocked-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-color: #f5c2c7;
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
         }
         .safe-fallback-message {
-            background-color: #cff4fc;
-            color: #055160;
-            border-color: #b6effb;
+            background-color: #cffafe;
+            color: #155e75;
+            border-color: #a5f3fc;
         }
         .input-area {
             padding: 1.5rem;
@@ -117,26 +116,22 @@ HTML_TEMPLATE = """
             border: 1px solid #cbd5e1;
             font-size: 1rem;
             outline: none;
-            transition: all 0.2s ease;
         }
         #user-input:focus {
-            border-color: #4c51bf;
-            box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.2);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
         }
         #send-button {
             margin-left: 1rem;
             padding: 0.75rem 1.5rem;
-            background-color: #4c51bf;
+            background-color: #2563eb;
             color: white;
             border-radius: 9999px;
             font-weight: 600;
             cursor: pointer;
-            outline: none;
-            transition: all 0.2s ease;
         }
         #send-button:hover {
-            background-color: #383d88;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #1e40af;
         }
         .loading-dots {
             display: flex;
@@ -163,18 +158,15 @@ HTML_TEMPLATE = """
 <body class="flex items-center justify-center min-h-screen p-4">
     <div class="chat-container">
         <div class="chat-header">
-            <h1 class="text-2xl font-bold text-gray-800">Psychological Chatbot 🤖</h1>
-            <p class="text-sm text-gray-600 mt-1">Your AI pre-consultation assistant</p>
+            <h1 class="text-2xl font-bold">Language Learning Bot 🌍</h1>
+            <p class="text-sm mt-1">Practice, learn, and improve your language skills with AI</p>
         </div>
 
-        <div id="chat-messages" class="chat-messages">
-            </div>
+        <div id="chat-messages" class="chat-messages"></div>
 
         <div class="input-area">
-            <input id="user-input" type="text" placeholder="Type your message..." autocomplete="off">
-            <button id="send-button">
-                Send
-            </button>
+            <input id="user-input" type="text" placeholder="Ask me to translate, practice conversation, or explain grammar..." autocomplete="off">
+            <button id="send-button">Send</button>
         </div>
     </div>
 
@@ -262,35 +254,6 @@ HTML_TEMPLATE = """
                 sendMessage();
             }
         });
-
-        // The fetchDisclaimer function is still here, but it's not called
-        // on page load anymore. This leaves the /disclaimer route intact
-        // but prevents the initial message from appearing.
-        async function fetchDisclaimer() {
-            try {
-                const response = await fetch('/disclaimer');
-                if (!response.ok) {
-                    throw new Error('Could not fetch disclaimer.');
-                }
-                const data = await response.json();
-                if (data.disclaimer) {
-                    const disclaimerRow = document.createElement('div');
-                    disclaimerRow.className = 'message-row';
-                    disclaimerRow.innerHTML = `
-                        <div class="disclaimer-message">
-                            <p>${data.disclaimer}</p>
-                        </div>
-                    `;
-                    chatMessages.appendChild(disclaimerRow);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-            } catch (error) {
-                console.error("Error fetching disclaimer:", error);
-            }
-        }
-
-        // Removed: document.addEventListener('DOMContentLoaded', fetchDisclaimer);
-
     </script>
 </body>
 </html>
@@ -329,7 +292,6 @@ def chat():
         response_data = chat_engine.process_message(user_prompt)
         return jsonify(response_data)
     except Exception as e:
-        # Log the error for debugging
         print(f"Error processing chat message: {e}")
         return jsonify({"response": "An error occurred. Please try again later.", "safety_action": "block"}), 500
 
