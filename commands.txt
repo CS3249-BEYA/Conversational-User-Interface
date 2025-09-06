@@ -10,7 +10,7 @@ brew install ollama
 3. Start Ollama service
 ollama serve
 
-4. Pull the model
+4. Pull the model (in another terminal tab)
 ollama pull phi3:mini
 
 5. Test run
@@ -18,7 +18,15 @@ ollama run phi3:mini "Hello"
 
 =================================
 
+then in another terminal
+
 pyenv local 3.12.2
 pip --version
 pip install -r requirements.txt
+
+from the root directory
+python -m app.app
+
+go to http://127.0.0.1:5000/ on ur web browser to talk to the Chatbot
+
 
