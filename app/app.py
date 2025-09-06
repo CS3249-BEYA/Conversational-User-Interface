@@ -23,60 +23,129 @@ HTML_TEMPLATE = """
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
+            transition: background-color 0.3s ease;
         }
         .chat-container {
             max-width: 800px;
-            height: 85vh;
+            height: 95vh;
             display: flex;
             flex-direction: column;
             border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             background-color: #ffffff;
             overflow: hidden;
+            transition: box-shadow 0.3s ease;
         }
-        .message-box {
-            padding: 1rem;
-            border-radius: 0.75rem;
-            margin-bottom: 0.5rem;
-            max-width: 75%;
-        }
-        .user-message {
-            background-color: #d1e7dd; /* Normal user message color */
-            align-self: flex-end;
-            border-bottom-right-radius: 0;
-        }
-        .assistant-message {
-            background-color: #e2e8f0; /* Normal assistant message color */
-            align-self: flex-start;
-            border-bottom-left-radius: 0;
-        }
-        .disclaimer-message {
-            background-color: #fff3cd; /* Warning/Disclaimer color */
-            color: #664d03;
-            border: 1px solid #ffecb5;
-            align-self: center;
-            max-width: 90%;
+        .chat-header {
+            background-color: #e2e8f0;
+            padding: 1.5rem;
+            border-bottom: 1px solid #cbd5e1;
             text-align: center;
         }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+        }
+        .message-row {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        .user-row {
+            justify-content: flex-end;
+        }
+        .assistant-row {
+            justify-content: flex-start;
+        }
+        .message-box {
+            padding: 0.75rem 1.25rem;
+            border-radius: 1.5rem;
+            max-width: 75%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .user-message {
+            background-color: #d1e7dd;
+            color: #0c6114;
+            border-bottom-right-radius: 0.5rem;
+        }
+        .assistant-message {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border-bottom-left-radius: 0.5rem;
+        }
+        .disclaimer-message, .blocked-message, .safe-fallback-message {
+            margin: 1rem auto;
+            max-width: 90%;
+            text-align: center;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid;
+            box-shadow: none;
+        }
+        .disclaimer-message {
+            background-color: #fff3cd;
+            color: #664d03;
+            border-color: #ffecb5;
+        }
         .blocked-message {
-            background-color: #f8d7da; /* Blocked message color */
-            color: #58151c;
-            border: 1px solid #f5c2c7;
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c2c7;
         }
         .safe-fallback-message {
-            background-color: #cff4fc; /* Safe fallback color */
+            background-color: #cff4fc;
             color: #055160;
-            border: 1px solid #b6effb;
+            border-color: #b6effb;
+        }
+        .input-area {
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+        }
+        #user-input {
+            flex-grow: 1;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        #user-input:focus {
+            border-color: #4c51bf;
+            box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.2);
+        }
+        #send-button {
+            margin-left: 1rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #4c51bf;
+            color: white;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        #send-button:hover {
+            background-color: #383d88;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .loading-dots {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            padding: 1rem;
+            justify-content: center;
         }
         .loading-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background-color: #94a3b8;
             border-radius: 50%;
             margin: 0 4px;
@@ -91,19 +160,19 @@ HTML_TEMPLATE = """
         }
     </style>
 </head>
-<body class="flex items-center justify-center h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4">
     <div class="chat-container">
-        <!-- Chat Display Area -->
-        <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
-            <!-- Disclaimer will be inserted here by JavaScript -->
+        <div class="chat-header">
+            <h1 class="text-2xl font-bold text-gray-800">Psychological Chatbot 🤖</h1>
+            <p class="text-sm text-gray-600 mt-1">Your AI pre-consultation assistant</p>
         </div>
 
-        <!-- Input Area -->
-        <div class="p-4 bg-gray-50 border-t border-gray-200 flex items-center">
-            <input id="user-input" type="text" placeholder="Type your message..."
-                    class="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
-            <button id="send-button"
-                    class="ml-4 p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200 shadow-md">
+        <div id="chat-messages" class="chat-messages">
+            </div>
+
+        <div class="input-area">
+            <input id="user-input" type="text" placeholder="Type your message..." autocomplete="off">
+            <button id="send-button">
                 Send
             </button>
         </div>
@@ -114,30 +183,34 @@ HTML_TEMPLATE = """
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
 
-        // Function to create and append a message bubble
         function appendMessage(text, type) {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = `message-row ${type === 'user-message' ? 'user-row' : 'assistant-row'}`;
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message-box ${type}`;
-            messageDiv.innerHTML = `<p class="whitespace-pre-wrap">${text}</p>`;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
+            messageDiv.innerHTML = `<p>${text}</p>`;
+
+            rowDiv.appendChild(messageDiv);
+            chatMessages.appendChild(rowDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
         }
 
-        // Function to show a loading indicator
         function showLoading() {
             const loadingDiv = document.createElement('div');
             loadingDiv.id = 'loading-indicator';
-            loadingDiv.className = 'loading-dots assistant-message';
+            loadingDiv.className = 'message-row assistant-row';
             loadingDiv.innerHTML = `
-                <div class="loading-dot"></div>
-                <div class="loading-dot"></div>
-                <div class="loading-dot"></div>
+                <div class="message-box assistant-message loading-dots">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
             `;
             chatMessages.appendChild(loadingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Function to remove the loading indicator
         function hideLoading() {
             const loadingIndicator = document.getElementById('loading-indicator');
             if (loadingIndicator) {
@@ -145,16 +218,12 @@ HTML_TEMPLATE = """
             }
         }
 
-        // Main function to send a message
         async function sendMessage() {
             const prompt = userInput.value.trim();
             if (prompt === '') return;
 
-            // Display user message immediately
             appendMessage(prompt, 'user-message');
             userInput.value = '';
-
-            // Show loading indicator
             showLoading();
 
             try {
@@ -170,8 +239,7 @@ HTML_TEMPLATE = """
 
                 const data = await response.json();
                 hideLoading();
-
-                // Determine message type based on safety_action
+                
                 let messageType = 'assistant-message';
                 if (data.safety_action === 'block') {
                     messageType = 'blocked-message';
@@ -188,7 +256,6 @@ HTML_TEMPLATE = """
             }
         }
 
-        // Event listeners for sending message
         sendButton.addEventListener('click', sendMessage);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -196,7 +263,9 @@ HTML_TEMPLATE = """
             }
         });
 
-        // Initial Disclaimer fetch
+        // The fetchDisclaimer function is still here, but it's not called
+        // on page load anymore. This leaves the /disclaimer route intact
+        // but prevents the initial message from appearing.
         async function fetchDisclaimer() {
             try {
                 const response = await fetch('/disclaimer');
@@ -205,15 +274,22 @@ HTML_TEMPLATE = """
                 }
                 const data = await response.json();
                 if (data.disclaimer) {
-                    appendMessage(data.disclaimer, 'disclaimer-message');
+                    const disclaimerRow = document.createElement('div');
+                    disclaimerRow.className = 'message-row';
+                    disclaimerRow.innerHTML = `
+                        <div class="disclaimer-message">
+                            <p>${data.disclaimer}</p>
+                        </div>
+                    `;
+                    chatMessages.appendChild(disclaimerRow);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
             } catch (error) {
                 console.error("Error fetching disclaimer:", error);
             }
         }
 
-        // Fetch disclaimer on page load
-        document.addEventListener('DOMContentLoaded', fetchDisclaimer);
+        // Removed: document.addEventListener('DOMContentLoaded', fetchDisclaimer);
 
     </script>
 </body>

@@ -63,7 +63,7 @@ You are a compassionate and supportive psychological pre-consultation chatbot. Y
 # strict = Maximum safety, may over-block
 # balanced = Recommended, balanced safety and usability
 # permissive = Minimum safety, only blocks clear violations
-SAFETY_MODE: Literal["strict", "balanced", "permissive"] = "strict"
+SAFETY_MODE: Literal["strict", "balanced", "permissive"] = "permissive"
 
 MAX_CONVERSATION_TURNS = 10  # Maximum turns before suggesting break
 CONTEXT_WINDOW_SIZE = 5  # How many previous turns to include in context
