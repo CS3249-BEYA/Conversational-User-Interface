@@ -6,7 +6,7 @@ This module is complete - students should NOT modify.
 import json
 import logging
 import time
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import requests
 from requests.adapters import HTTPAdapter
