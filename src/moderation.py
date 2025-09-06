@@ -160,27 +160,22 @@ I cannot and will not provide assistance with that request as it could potential
             """,
 
             "disclaimer": """
-Welcome to the Psychological Pre-Consultation Support System.
+Welcome to the Chinese Language Learning Assistant! 🌟
 
-IMPORTANT DISCLAIMER:
-This is an AI support system designed to provide initial emotional support and guidance. Please note:
-- This system is not a substitute for professional medical advice, diagnosis, or treatment.
-- It does not offer emergency services.
-- The conversation is not monitored by a human professional.
-- Your privacy is important, but please do not share personally identifiable information.
-- Any information shared is for support purposes only and should not be considered a clinical record.
+NOTE:
+- This AI helps you practice and improve Mandarin.  
+- It is not a certified teacher.  
+- Conversations are for learning purposes only and are not monitored by a human.  
+- Do not share personal information.
 
-When to Seek Immediate Help:
-If you are in immediate danger or a crisis situation, please contact emergency services or a crisis hotline. Examples include thoughts of self-harm, harm to others, or any other immediate safety risk.
+What I Offer:
+- Conversational practice with Chinese characters, Hanyu Pinyin, and English meaning  
+- Vocabulary and grammar support  
+- Sentence corrections and cultural tips  
 
-What I Can Offer:
-- A non-judgmental and empathetic listening space
-- Techniques for stress and anxiety management
-- Support in navigating common life challenges
-- Guidance on finding professional mental health resources
+Focus on improving your Chinese — what would you like to practice today?
+""",
 
-Your wellbeing is important. How can I support you today?
-            """,
         }
 
     def moderate(
