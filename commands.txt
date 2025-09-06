@@ -8,10 +8,10 @@ brew install ollama
 ollama serve
 
 4. Pull the model (in another terminal tab)
-ollama pull phi3:mini
+ollama pull phi3:medium
 
 5. Test run
-ollama run phi3:mini "Hello"
+ollama pull phi3:medium "Hello"
 
 6. set up environment
 python3 -m venv venv
