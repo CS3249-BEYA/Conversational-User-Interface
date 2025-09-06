@@ -49,16 +49,18 @@ ollama --version
 ### Step 3: Start Ollama Service
 
 ```bash
-# Start Ollama in background (keep terminal open)
+# Start Ollama service (keep this terminal tab open!)
 ollama serve
-
-# Verify available models (in a new terminal)
-ollama list
 ```
+
+> ⚠️ **Important:** Keep this terminal tab open while using the chatbot.
+> You will need to open a **new terminal tab/window** for subsequent steps.
 
 ---
 
 ### Step 4: Pull the Phi-3 Medium Model
+
+In a **new terminal tab/window**, run:
 
 ```bash
 # Pull Phi-3 Medium (~14B parameters)
@@ -70,7 +72,7 @@ ollama pull phi3:medium
 ### Step 5: Test the Model
 
 ```bash
-# Simple test prompt
+# In the same new tab
 ollama run phi3:medium "Hello, how are you?"
 
 # Exit with /bye
@@ -81,7 +83,7 @@ ollama run phi3:medium "Hello, how are you?"
 ### Step 6: Set Up Python Virtual Environment
 
 ```bash
-# Create and activate virtual environment
+# In another terminal tab/window
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -108,6 +110,8 @@ Open your browser and navigate to:
 http://127.0.0.1:5000/
 ```
 
+> Now you can chat with your Chinese Language Learning Bot!
+
 ---
 
 ## Windows Installation
@@ -116,7 +120,7 @@ http://127.0.0.1:5000/
 
 1. Download Python 3.11+ from [https://python.org](https://python.org)
 2. Check **Add Python to PATH** during installation
-3. Verify:
+3. Verify installation:
 
 ```powershell
 python --version
@@ -126,15 +130,28 @@ python --version
 
 ### Step 2: Install Ollama
 
-1. Download the installer from [https://ollama.com/download/windows](https://ollama.com/download/windows)
+1. Download installer from [https://ollama.com/download/windows](https://ollama.com/download/windows)
 2. Run the installer (OllamaSetup.exe)
-3. Ollama starts automatically and appears in the system tray
+3. Ollama will start automatically and appear in the system tray
 
 ---
 
-### Step 3: Pull the Phi-3 Medium Model
+### Step 3: Start Ollama Service
 
 Open PowerShell:
+
+```powershell
+# Start Ollama service (keep this window open!)
+ollama serve
+```
+
+> Keep this window open. Open a **new PowerShell tab/window** for pulling models and running Python commands.
+
+---
+
+### Step 4: Pull the Phi-3 Medium Model
+
+In the new terminal tab/window:
 
 ```powershell
 ollama pull phi3:medium
@@ -146,7 +163,7 @@ ollama run phi3:medium "Hello"
 
 ---
 
-### Step 4: Set Up Python Environment
+### Step 5: Set Up Python Virtual Environment
 
 ```powershell
 python -m venv venv
@@ -156,13 +173,13 @@ pip install -r requirements.txt
 
 ---
 
-### Step 5: Start the Chatbot
+### Step 6: Start the Chatbot
 
 ```powershell
 python -m app.app
 ```
 
-Visit:
+Visit in your browser:
 
 ```
 http://127.0.0.1:5000/
@@ -198,3 +215,11 @@ ollama pull phi3:medium
 
 # Use --insecure if there are certificate issues
 ollama pull phi3:medium --insecure
+```
+
+---
+
+### Notes
+
+* Always keep the **Ollama service tab running** while using the chatbot.
+* Use separate terminal tabs for Python environment setup, dependency installation, and running the chatbot.
