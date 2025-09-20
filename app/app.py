@@ -1,236 +1,105 @@
 from src.chat_engine import get_engine
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 import sys
 import os
 
+# Add parent directory to path for src module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-app = Flask(__name__)
-chat_engine = get_engine()
+app = Flask(__name__, template_folder='templates') # Specify templates folder
 
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chinese Language Learning Bot</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #f0f4ff 0%, #e0f7ff 100%);
-    margin: 0;
-}
-.chat-container {
-    max-width: 700px;
-    margin: 2rem auto;
-    display: flex;
-    flex-direction: column;
-    height: 85vh;
-    background-color: #ffffff;
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-.chat-header {
-    background-color: #2563eb;
-    color: white;
-    padding: 1.5rem;
-    text-align: center;
-    font-weight: 600;
-}
-.chat-messages {
-    flex-grow: 1;
-    padding: 1rem 1.5rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-.message-row {
-    display: flex;
-    align-items: flex-start;
-}
-.user-row {
-    justify-content: flex-end;
-}
-.assistant-row {
-    justify-content: flex-start;
-}
-.message-box {
-    max-width: 70%;
-    padding: 0.75rem 1rem;
-    border-radius: 1rem;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.user-message {
-    background-color: #dbeafe;
-    color: #1e40af;
-    border-bottom-right-radius: 0.3rem;
-}
-.assistant-message {
-    background-color: #f1f5f9;
-    color: #334155;
-    border-bottom-left-radius: 0.3rem;
-}
-.avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.input-area {
-    display: flex;
-    padding: 1rem 1.5rem;
-    border-top: 1px solid #e2e8f0;
-    background-color: #f9fafb;
-}
-#user-input {
-    flex-grow: 1;
-    padding: 0.75rem 1rem;
-    border-radius: 9999px;
-    border: 1px solid #cbd5e1;
-    outline: none;
-    font-size: 1rem;
-}
-#user-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-}
-#send-button {
-    margin-left: 0.75rem;
-    padding: 0.6rem 1.5rem;
-    background-color: #2563eb;
-    color: white;
-    font-weight: 600;
-    border-radius: 9999px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-#send-button:hover {
-    background-color: #1e40af;
-}
-.loading-dots {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.loading-dot {
-    width: 8px;
-    height: 8px;
-    background-color: #94a3b8;
-    border-radius: 50%;
-    margin: 0 3px;
-    animation: bounce 1.2s infinite ease-in-out both;
-}
-.loading-dot:nth-child(1) { animation-delay: -0.3s; }
-.loading-dot:nth-child(2) { animation-delay: -0.15s; }
-@keyframes bounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1); }
-}
-</style>
-</head>
-<body>
-<div class="chat-container">
-    <div class="chat-header">
-        Chinese Language Learning Bot 🌏
-        <p class="text-sm mt-1 font-normal">Practice Mandarin with pinyin, translation, and grammar tips</p>
-    </div>
-    <div id="chat-messages" class="chat-messages"></div>
-    <div class="input-area">
-        <input id="user-input" type="text" placeholder="Type a sentence, ask for translation, or grammar tips..." autocomplete="off"/>
-        <button id="send-button">Send</button>
-    </div>
-</div>
+# Global chat engine instance
+chat_engine = None
 
-<script>
-const chatMessages = document.getElementById('chat-messages');
-const userInput = document.getElementById('user-input');
-const sendButton = document.getElementById('send-button');
+# Path for storing profiles
+PROFILE_DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'profiles.json')
 
-function appendMessage(text, type) {
-    const row = document.createElement('div');
-    row.className = 'message-row ' + (type === 'user-message' ? 'user-row' : 'assistant-row');
-    const box = document.createElement('div');
-    box.className = 'message-box ' + type;
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.style.backgroundImage = type==='user-message' ? 'url(https://i.imgur.com/8Km9tLL.png)' : 'url(https://i.imgur.com/1X9kzqK.png)';
-    avatar.style.backgroundSize = 'cover';
-    box.appendChild(avatar);
-    const textNode = document.createElement('div');
-    textNode.innerHTML = text;
-    box.appendChild(textNode);
-    row.appendChild(box);
-    chatMessages.appendChild(row);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+def load_user_profiles():
+    """Loads all user profiles from profiles.json."""
+    if not os.path.exists(PROFILE_DATA_PATH):
+        return {}
+    with open(PROFILE_DATA_PATH, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-function showLoading() {
-    const loadingDiv = document.createElement('div');
-    loadingDiv.id = 'loading-indicator';
-    loadingDiv.className = 'message-row assistant-row';
-    loadingDiv.innerHTML = `
-        <div class="message-box assistant-message loading-dots">
-            <div class="loading-dot"></div>
-            <div class="loading-dot"></div>
-            <div class="loading-dot"></div>
-        </div>`;
-    chatMessages.appendChild(loadingDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+def save_user_profile(user_id, profile_data):
+    """Saves a single user profile to profiles.json."""
+    profiles = load_user_profiles()
+    profiles[user_id] = profile_data
+    os.makedirs(os.path.dirname(PROFILE_DATA_PATH), exist_ok=True)
+    with open(PROFILE_DATA_PATH, 'w', encoding='utf-8') as f:
+        json.dump(profiles, f, indent=4, ensure_ascii=False)
 
-function hideLoading() {
-    const loadingIndicator = document.getElementById('loading-indicator');
-    if (loadingIndicator) loadingIndicator.remove();
-}
 
-async function sendMessage() {
-    const prompt = userInput.value.trim();
-    if(!prompt) return;
-    appendMessage(prompt, 'user-message');
-    userInput.value = '';
-    showLoading();
-    try {
-        const res = await fetch('/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt}) });
-        const data = await res.json();
-        hideLoading();
-        let type = 'assistant-message';
-        if(data.safety_action==='block') type='blocked-message';
-        else if(data.safety_action==='safe_fallback') type='safe-fallback-message';
-        appendMessage(data.response, type);
-    } catch(e) {
-        hideLoading();
-        appendMessage('An error occurred. Please try again later.', 'blocked-message');
-        console.error(e);
-    }
-}
-
-sendButton.addEventListener('click', sendMessage);
-userInput.addEventListener('keypress', e => { if(e.key==='Enter') sendMessage(); });
-</script>
-</body>
-</html>
-"""
+@app.before_request
+def ensure_chat_engine():
+    """Initializes chat_engine if it hasn't been already."""
+    global chat_engine
+    if chat_engine is None:
+        chat_engine = get_engine()
+        user_profiles = load_user_profiles()
+        if 'default_user' in user_profiles: # Check for a default profile
+            chat_engine.set_user_profile(user_profiles['default_user'])
+            print("Loaded default user profile into chat engine.")
+        else:
+            print("No default user profile found. Chat engine running without profile data.")
 
 
 @app.route("/")
-def home():
-    return HTML_TEMPLATE
+def index():
+    """Determines whether to show the quiz or the chat."""
+    # For a simple demo, check if a 'default_user' profile exists
+    profiles = load_user_profiles()
+    if 'default_user' in profiles:
+        return redirect(url_for('chat_interface'))
+    else:
+        return redirect(url_for('profile_quiz'))
+
+@app.route("/profile_quiz")
+def profile_quiz():
+    """Serves the profiling quiz HTML page."""
+    return render_template('profile_quiz.html')
+
+@app.route("/submit_profile", methods=["POST"])
+def submit_profile():
+    """Receives and saves the user's profile data."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"message": "Invalid profile data."}), 400
+
+        # For this demo, we'll save it as a 'default_user'
+        user_id = 'default_user'
+        save_user_profile(user_id, data)
+
+        # Update the chat engine with the new profile immediately
+        global chat_engine
+        if chat_engine:
+            chat_engine.set_user_profile(data)
+        else:
+            # If chat_engine wasn't initialized yet (unlikely with @before_request but good for robustness)
+            chat_engine = get_engine()
+            chat_engine.set_user_profile(data)
+
+
+        print(f"Profile saved for {user_id}: {data}")
+        return jsonify({"message": "Profile saved successfully!"}), 200
+    except Exception as e:
+        print(f"Error submitting profile: {e}")
+        return jsonify({"message": "Error saving profile."}), 500
+
+@app.route("/chat_interface")
+def chat_interface():
+    """Serves the main chat interface HTML page."""
+    return render_template('chat.html')
 
 
 @app.route("/disclaimer")
 def disclaimer():
     try:
-        text = chat_engine.moderator.get_disclaimer()
+        # Assuming chat_engine has a moderator with get_disclaimer()
+        # For this example, we'll just return a static disclaimer
+        text = "This chatbot is for educational purposes only and may not always provide perfectly accurate or complete information. Always verify critical language or cultural details with reliable sources."
         return jsonify({"disclaimer": text})
     except Exception as e:
         print(f"Error getting disclaimer: {e}")
@@ -246,12 +115,20 @@ def chat():
         user_prompt = data.get("prompt", "").strip()
         if not user_prompt:
             return jsonify({"response": "Please enter a message.", "safety_action": "allow"}), 400
+
+        global chat_engine
+        if chat_engine is None:
+            # Re-initialize if for some reason it's gone (shouldn't happen with @before_request)
+            chat_engine = get_engine()
+
         response_data = chat_engine.process_message(user_prompt)
         return jsonify(response_data)
     except Exception as e:
         print(f"Error processing chat: {e}")
-        return jsonify({"response": "Error occurred.", "safety_action": "block"}), 500
+        return jsonify({"response": [{"chinese": "抱歉，服务器发生错误。", "pinyin": "Bàoqiàn, fúwùqì fāshēng cuòwù.", "english": "Sorry, a server error occurred."}], "safety_action": "block"}), 500
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Create data directory if it doesn't exist
+    os.makedirs('data', exist_ok=True)
+    app.run(debug=True, host='0.0.0.0', port=5001)

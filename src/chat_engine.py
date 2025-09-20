@@ -1,5 +1,6 @@
 import logging
 import time
+import re
 from typing import Dict, List
 
 from .config import (
@@ -28,6 +29,12 @@ class ChatEngine:
         self.turn_count = 0
         self.session_id = f"session_{int(time.time())}"
         self.first_interaction = True
+        self.user_profile: Dict = {}
+
+    def set_user_profile(self, profile_data: Dict):
+        """Sets or updates the user's profile data."""
+        self.user_profile = profile_data
+        logger.info(f"User profile set: {self.user_profile}")
     
     def process_message(
         self,
@@ -301,6 +308,7 @@ class ChatEngine:
         self.turn_count = 0
         self.first_interaction = True
         self.session_id = f"session_{int(time.time())}"
+        self.user_profile = {}
         logger.info(f"Chat engine reset. New session: {self.session_id}")
 
 _engine_instance = None

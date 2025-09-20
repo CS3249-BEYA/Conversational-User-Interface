@@ -9,7 +9,7 @@ import os
 TEMPERATURE = 0.0 
 TOP_P = 1.0
 MAX_TOKENS = 500
-TIMEOUT_SECONDS = 30
+TIMEOUT_SECONDS = 60
 RANDOM_SEED = 42
 
 # Model Configuration
@@ -38,6 +38,13 @@ You are a friendly Chinese language learning chatbot. Your goal is to help users
 - Always include: Chinese characters, Hanyu Pinyin, and English meaning.
 - Include short cultural notes when relevant.
 - All Chinese text must include Hanyu Pinyin.
+
+## Reply
+"For every response, you MUST provide the Simplified Chinese characters, Hanyu Pinyin, and an English translation. "
+"Use the following format for each sentence or phrase: "
+"**Chinese:** [Characters]\n"
+"**Pinyin:** [Pinyin]\n"
+"**English:** [Translation]\n\n"
 """
 
 
