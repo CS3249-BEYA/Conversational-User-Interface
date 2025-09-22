@@ -6,6 +6,9 @@ This guide explains how to install and run the Chinese Language Learning Chatbot
 
 ## Prerequisites
 
+
+# test 
+
 - Python 3.11+
 - 8GB RAM (minimum)
 - 10GB free disk space
