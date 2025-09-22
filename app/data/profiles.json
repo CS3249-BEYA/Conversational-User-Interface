@@ -1,0 +1,10 @@
+{
+    "default_user": {
+        "name": "Ashley",
+        "level": "beginner",
+        "goal": "be able to speak chinese when going oversea",
+        "speaking_confidence": "somewhat_confident",
+        "hanzi_exposure": "yes",
+        "pinyin_knowledge": "yes"
+    }
+}
