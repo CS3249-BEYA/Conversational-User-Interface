@@ -5,6 +5,7 @@ Students should modify TODO sections only.
 
 from typing import Literal
 import os
+import json
 
 TEMPERATURE = 0.0 
 TOP_P = 1.0
@@ -26,8 +27,44 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TESTS_DIR = os.path.join(BASE_DIR, "tests")
 OUTPUTS_FILE = os.path.join(TESTS_DIR, "outputs.jsonl")
 SCHEMA_FILE = os.path.join(TESTS_DIR, "expected_schema.json")
+
+PROFILE_FILE = os.path.join(BASE_DIR, "app", "data", "profile.json")
+def _load_user_profile(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get("default_user", {})
+    except FileNotFoundError:
+        print(f"Warning: Profile file not found at {file_path}. Using empty profile.")
+        return {}
+    except json.JSONDecodeError:
+        print(f"Warning: Error decoding JSON from {file_path}. Using empty profile.")
+        return {}
+    
+def _format_user_profile_for_prompt(profile_data):
+    """Formats the user profile data into a string for the system prompt."""
+    if not profile_data:
+        return ""
+
+    profile_str = "\n## Current User Profile\n"
+    profile_str += f"- User Name: {profile_data.get('name', 'Unknown')}\n"
+    profile_str += f"- Learning Level: **{profile_data.get('level', 'not specified')}**\n"
+    profile_str += f"- Goal: **{profile_data.get('goal', 'to improve Chinese skills')}**\n"
+    profile_str += f"- Speaking Confidence: {profile_data.get('speaking_confidence', 'not specified')}\n"
+    profile_str += f"- Hanzi Exposure: {'Yes' if profile_data.get('hanzi_exposure') == 'yes' else 'no'}\n"
+    profile_str += f"- Pinyin Knowledge: {'Yes' if profile_data.get('pinyin_knowledge') == 'yes' else 'no'}\n"
+    profile_str += "\n**Tailor your responses specifically to this user's background and needs.**\n"
+    return profile_str
+
+# Load and format the profile data when config.py is imported
+user_profile_data = _load_user_profile(PROFILE_FILE)
+formatted_profile_section = _format_user_profile_for_prompt(user_profile_data)
+
 SYSTEM_PROMPT = """
 You are a friendly Chinese language learning chatbot. Your goal is to help users practice and improve Mandarin in an encouraging way. Keep responses concise (under 100 words) and adapt to the user's level.
+
+## User details
+{formatted_profile_section}
 
 ## Role
 - Stay focused on Chinese language learning; do not give unrelated advice.
@@ -42,9 +79,9 @@ You are a friendly Chinese language learning chatbot. Your goal is to help users
 ## Reply
 "For every response, you MUST provide the Simplified Chinese characters, Hanyu Pinyin, and an English translation. "
 "Use the following format for each sentence or phrase: "
-"**Chinese:** [Characters]\n"
-"**Pinyin:** [Pinyin]\n"
-"**English:** [Translation]\n\n"
+"Chinese: [Characters]\n"
+"Pinyin: [Pinyin]\n"
+"English: [Translation]\n\n"
 """
 
 
