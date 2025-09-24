@@ -43,7 +43,7 @@ Quick steps:
 ````
 
 6. Start the chatbot: `python -m app.app`
-7. Open `http://127.0.0.1:5000/` in your browser
+7. Open `http://127.0.0.1:5001/` in your browser
 
 ---
 
