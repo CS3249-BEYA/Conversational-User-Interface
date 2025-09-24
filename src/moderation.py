@@ -159,8 +159,7 @@ Remember, seeking professional help is a sign of strength. You are taking an imp
 I cannot and will not provide assistance with that request as it could potentially cause harm. My purpose is to provide a safe and supportive conversation, and I cannot engage in or support discussions of violence, illegal activities, or harassment. This is a strict boundary of our conversation. If you are experiencing distress, I am here to listen, but we must keep our conversation within a safe and constructive space. I encourage you to redirect our conversation to a topic that aligns with my purpose of offering emotional support.
             """,
 
-            "disclaimer": """
-Welcome to the Chinese Language Learning Assistant! 🌟
+            "disclaimer": """Welcome to the Chinese Language Learning Assistant! 🌟
 
 NOTE:
 - This AI helps you practice and improve Mandarin.  
@@ -173,8 +172,7 @@ What I Offer:
 - Vocabulary and grammar support  
 - Sentence corrections and cultural tips  
 
-Focus on improving your Chinese — what would you like to practice today?
-""",
+Focus on improving your Chinese — what would you like to practice today?""",
 
         }
 

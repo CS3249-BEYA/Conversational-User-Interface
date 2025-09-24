@@ -68,12 +68,6 @@ body {
     color: #334155;
     border-bottom-left-radius: 0.3rem;
 }
-.avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
 .input-area {
     display: flex;
     padding: 1rem 1.5rem;
@@ -149,11 +143,6 @@ function appendMessage(text, type) {
     row.className = 'message-row ' + (type === 'user-message' ? 'user-row' : 'assistant-row');
     const box = document.createElement('div');
     box.className = 'message-box ' + type;
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.style.backgroundImage = type==='user-message' ? 'url(https://i.imgur.com/8Km9tLL.png)' : 'url(https://i.imgur.com/1X9kzqK.png)';
-    avatar.style.backgroundSize = 'cover';
-    box.appendChild(avatar);
     const textNode = document.createElement('div');
     textNode.innerHTML = text;
     box.appendChild(textNode);
