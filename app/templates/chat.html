@@ -141,14 +141,49 @@ const sendButton = document.getElementById('send-button');
 function appendMessage(text, type) {
     const row = document.createElement('div');
     row.className = 'message-row ' + (type === 'user-message' ? 'user-row' : 'assistant-row');
+
     const box = document.createElement('div');
     box.className = 'message-box ' + type;
+
     const textNode = document.createElement('div');
     textNode.innerHTML = text;
     box.appendChild(textNode);
+
+    if(type === 'assistant-message') {
+        const speakBtn = document.createElement('button');
+        speakBtn.textContent = '🔊 Speak';
+        speakBtn.className = 'px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600';
+        speakBtn.onclick = () => speak(text);
+        box.appendChild(speakBtn);
+    }
+
     row.appendChild(box);
     chatMessages.appendChild(row);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+async function speak(text) {
+    // Extract only Chinese characters
+    const chineseOnly = text.match(/[\u4e00-\u9fff]+/g)?.join(" ");
+
+    if (!chineseOnly) {
+        console.log("No Chinese text to read.");
+        return;
+    }
+
+    try {
+        const res = await fetch('/speak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: chineseOnly })
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play();
+    } catch (err) {
+        console.error("Error playing TTS:", err);
+    }
 }
 
 function showLoading() {

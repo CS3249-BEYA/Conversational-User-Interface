@@ -1,0 +1,10 @@
+{
+    "default_user": {
+        "name": "eunice",
+        "level": "beginner",
+        "goal": "have daily convo",
+        "speaking_confidence": "somewhat_confident",
+        "hanzi_exposure": "yes",
+        "pinyin_knowledge": "no"
+    }
+}
