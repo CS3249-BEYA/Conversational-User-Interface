@@ -3,6 +3,9 @@ import json
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import sys
 import os
+from gtts import gTTS
+from io import BytesIO
+from flask import send_file, request
 
 # Add parent directory to path for src module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -127,6 +130,23 @@ def chat():
         print(f"Error processing chat: {e}")
         return jsonify({"response": [{"chinese": "抱歉，服务器发生错误。", "pinyin": "Bàoqiàn, fúwùqì fāshēng cuòwù.", "english": "Sorry, a server error occurred."}], "safety_action": "block"}), 500
 
+@app.route("/speak", methods=["POST"])
+def speak():
+    data = request.get_json()
+    text = data.get("text", "")
+    if not text:
+        return {"error": "No text provided"}, 400
+
+    # Choose language
+    lang = "zh-cn" if any("\u4e00" <= c <= "\u9fff" for c in text) else "en"
+
+    # Generate TTS audio
+    tts = gTTS(text=text, lang=lang)
+    audio_io = BytesIO()
+    tts.write_to_fp(audio_io)
+    audio_io.seek(0)
+
+    return send_file(audio_io, mimetype="audio/mpeg")
 
 if __name__ == "__main__":
     # Create data directory if it doesn't exist
