@@ -7,7 +7,7 @@ import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional
 
 from .config import SAFETY_MODE
 
@@ -41,122 +41,72 @@ class Moderator:
         self._initialize_rules()
 
     def _initialize_rules(self):
-        """
-        Initialize moderation rules based on POLICY.md.
-        TODO: Students must define these based on their POLICY.md
-        
-        IMPLEMENTATION GUIDE:
-        1. Copy all keywords and patterns from your completed POLICY.md
-        2. Ensure Python formatting (lists, strings, regex compilation)
-        3. Templates should be multi-line strings with proper formatting
-        """
+        """Initialize moderation rules based on POLICY.md."""
 
-        # TODO: Define crisis keywords and patterns
-        # These should detect immediate risk of harm
-        self.crisis_keywords = [
-            # Direct suicide mentions:
-            "suicide", "end my life", "kill myself", "take my life", "can't go on", "better off dead", "ready to die",
-            # Self-harm expressions:
-            "hurt myself", "self-harm", "cut myself", "injure myself", "harming myself", "punish myself",
-            # Imminent danger indicators:
-            "goodbye forever", "final message", "last time", "won't be here", "leaving soon", "over it all",
-            # Emotional crisis expressions:
-            "hopeless", "worthless", "can't take it", "don't see the point", "at my wit's end", "giving up"
+        # Define racial bias / racism detection keywords
+        self.racial_bias_keywords = [
+            "chink", "ah tiong", "bangla", "keling", "malay pig", "go back china",
+            "dirty indian", "smelly foreigner", "yellow monkey", "blackie",
+            "inferior race", "your race is", "better race than",
+            "hate chinese", "hate malay", "hate indian"
         ]
 
-        # TODO: Crisis patterns - regex for complex expressions
-        self.crisis_patterns = [
-            r"\b(want|going|plan|ready) to (die|kill|hurt|end)\b",
-            r"\b(thinking|thought) about (suicide|dying|ending it)\b",
-            r"\b(no|don't have) a (reason|point) to (live|go on|continue)\b",
-            r"\b(tonight|tomorrow|this weekend) (i will|i'm going to)\b",
-            r"\b(wish|wishing) i was (dead|gone)\b",
-            r"\b(can't take|can't stand) this (anymore|any longer)\b",
-            r"\b(what's|what is) the point of living\b",
-            r"\b(going to|gonna) (hurt myself|self-harm|end it)\b"
+        # Racial bias regex patterns
+        self.racial_bias_patterns = [
+            r"\b(chinese|malay|indian|foreigner|expat)\s+(are|is)\s+(lazy|dirty|stupid|smelly|inferior)\b",
+            r"\b(go back to|send them back to)\s+(china|india|bangladesh|malaysia)\b",
+            r"\b(i hate|we hate)\s+(chinese|malays|indians|foreigners)\b",
+            r"\b(too many|flooded with)\s+(foreigners|prc|workers)\b"
         ]
 
-        # TODO: Define medical request patterns
-        self.medical_keywords = [
-            # Diagnosis requests:
-            "diagnose", "what condition", "do I have", "am I sick", "is this a disorder", "what's wrong with me",
-            # Medication/treatment:
-            "medication", "what pills", "drugs for", "cure for", "what treatment", "prescribe me", "side effects", "what should I take",
-            # Mental health specific:
-            "am i depressed", "bipolar", "schizophrenic", "anorexia", "adhd", "ocd", "anxiety disorder", "what's my diagnosis",
-            # Other:
-            "psychiatrist recommendation", "doctor's advice", "medical advice"
+        # Define general bias keywords (other than racial)
+        self.bias_keywords = [
+            "women are weak", "men are better", "useless women", "toxic men",
+            "old people are useless", "youngsters are stupid",
+            "muslims are", "christians are", "hindus are", "buddhists are",
+            "filipinos are lazy", "thais are stupid", "japanese are weird"
         ]
 
-        # TODO: Medical patterns - regex for complex expressions
-        self.medical_patterns = [
-            r"\b(prescribe|recommend|suggest) (medication|pills|drugs)\b",
-            r"\bwhat (medication|medicine|pills) should i take\b",
-            r"\bdo i have (depression|anxiety|bipolar|ocd)\b",
-            r"\bcan you diagnose me\b",
-            r"\bwhat is the best treatment for\b",
-            r"\bshould i take (a drug|a pill) for\b",
-            r"\bwhat are the side effects of\b",
-            r"\bwhere can i find a psychiatrist\b"
+        # Bias regex patterns
+        self.bias_patterns = [
+            r"\b(all|most)\s+(women|men)\s+(are|are so)\s+(weak|dumb|emotional|useless)\b",
+            r"\b(old|young)\s+(people|folks)\s+(are|are so)\s+(stupid|slow|useless)\b",
+            r"\b(all|most)\s+(muslims|christians|buddhists|hindus)\s+(are|are so)\b",
+            r"\b(i hate|we hate)\s+(women|men|old people|religion)\b"
         ]
 
-        # TODO: Define harmful content patterns
-        self.harmful_content = {
-            "violence": [
-                "attack", "revenge", "hurt someone", "beat up", "murder", "kill a person", "assault", "threaten"
-            ],
-            "illegal": [
-                "buy drugs", "sell drugs", "illegal activities", "stolen goods", "fraud", "hacking", "piracy", "smuggling"
-            ],
-            "harassment": [
-                "hate speech", "discriminate", "harass", "bully", "stalk", "doxxing", "threaten to expose", "insult"
-            ]
-        }
-
-        # TODO: Define confidence thresholds based on safety mode
+        # Confidence thresholds
         self.confidence_thresholds = {
             "strict": {
-                "crisis": 0.3,
-                "medical": 0.4,
-                "harmful": 0.5,
+                "racial_bias": 0.3,
+                "bias": 0.4,
             },
             "balanced": {
-                "crisis": 0.6,
-                "medical": 0.7,
-                "harmful": 0.8,
+                "racial_bias": 0.6,
+                "bias": 0.7,
             },
             "permissive": {
-                "crisis": 0.9,
-                "medical": 0.95,
-                "harmful": 0.95,
+                "racial_bias": 0.9,
+                "bias": 0.95,
             }
         }
 
-        # TODO: Define safety fallback templates
-        # Copy complete templates from POLICY.md
+        # Fallback response templates
         self.fallback_templates = {
-            "crisis": """
-I'm deeply concerned about what you're sharing. Your safety is my top priority, and I want you to know that help is available right now. Your life has value, and there are people who want to support you through this. Please reach out to trained crisis counselors immediately:
-- Singapore Association for Mental Health (SAMH) 24-hour helpline: 1800 283 7019
-- Samaritans of Singapore (SOS) Crisis Helpline: 1800 221 4444
-- Institute of Mental Health (IMH) Hotline: 6389 2222
-It sounds like you are going through an extremely difficult time, and feeling overwhelmed is understandable. You are not alone in this, and reaching out to trained professionals can help you navigate these intense emotions safely. Even if it feels hard to take the first step, talking to someone who is trained to listen and provide support can make a real difference.
-Remember, seeking help is a sign of strength, and connecting with professional support can help you find safety and stability. Please consider contacting one of the hotlines above immediately. Your life matters, and support is just a call or text away.
+            "racial_bias": """
+I need to pause here 🚫. The message contains racially biased or discriminatory language.  
+This chatbot is designed to support inclusive and respectful learning of Mandarin, so racism or derogatory terms won’t be part of our conversations.  
+
+👉 Let’s keep the practice positive and constructive.  
+Would you like me to suggest respectful vocabulary for describing people of different backgrounds instead?
             """,
 
-            "medical": """
-I understand you're looking for medical guidance, and I appreciate you reaching out. However, I'm not qualified to provide medical diagnoses or treatment recommendations.
-I hear that you are concerned about your mental health and may be seeking advice on medication, diagnosis, or treatment options. It's completely valid to have these questions, and acknowledging them is an important step toward support.
-For your health and safety, please consult with:
-- A licensed psychiatrist for medication questions
-- A licensed psychologist or counselor for therapy and mental health evaluation
-- Your primary care doctor for any general medical concerns
-While I cannot provide medical advice, I can offer empathetic listening and help you reflect on your thoughts and emotions. I can also provide information on coping strategies, stress management techniques, and point you toward professional resources that are appropriate for your situation.
-Remember, seeking professional help is a sign of strength. You are taking an important step by reaching out, and support is available to guide you safely through this journey.
-            """,
+            "bias": """
+I noticed your message may include biased or discriminatory language about gender, religion, or age.  
+This chatbot’s purpose is to **help everyone learn Chinese respectfully**, without reinforcing stereotypes or unfair judgments.  
 
-            "harmful": """
-I cannot and will not provide assistance with that request as it could potentially cause harm. My purpose is to provide a safe and supportive conversation, and I cannot engage in or support discussions of violence, illegal activities, or harassment. This is a strict boundary of our conversation. If you are experiencing distress, I am here to listen, but we must keep our conversation within a safe and constructive space. I encourage you to redirect our conversation to a topic that aligns with my purpose of offering emotional support.
+👉 Let’s shift focus to language practice!  
+For example, instead of stereotypes, we can learn neutral and polite phrases for describing people. Want to try?
             """,
 
             "disclaimer": """Welcome to the Chinese Language Learning Assistant! 🌟
@@ -172,8 +122,7 @@ What I Offer:
 - Vocabulary and grammar support  
 - Sentence corrections and cultural tips  
 
-Focus on improving your Chinese — what would you like to practice today?""",
-
+Focus on improving your Chinese, what would you like to practice today?""",
         }
 
     def moderate(
@@ -182,38 +131,19 @@ Focus on improving your Chinese — what would you like to practice today?""",
         model_response: Optional[str] = None,
         context: Optional[List[Dict]] = None,
     ) -> ModerationResult:
-        """
-        Perform moderation on user input and/or model output.
-        
-        Args:
-            user_prompt: The user's input text
-            
-        Returns:
-            ModerationResult with action and explanation
-            
-        IMPLEMENTATION ORDER:
-        1. Check crisis (highest priority - must not miss)
-        2. Check medical (prevent harmful advice)
-        3. Check harmful content (filter inappropriate)
-        """
+        """Perform moderation on user input and/or model output."""
 
-        # Step 1: Check for crisis indicators (highest priority)
-        crisis_check = self._check_crisis(user_prompt)
-        if crisis_check.action != ModerationAction.ALLOW:
-            logger.warning(f"Crisis detected: {crisis_check.reason}")
-            return crisis_check
+        # Step 1: Check for racial bias
+        racial_bias_check = self._check_racial_bias(user_prompt)
+        if racial_bias_check.action != ModerationAction.ALLOW:
+            logger.warning(f"Racial bias detected: {racial_bias_check.reason}")
+            return racial_bias_check
 
-        # Step 2: Check for medical requests
-        medical_check = self._check_medical(user_prompt)
-        if medical_check.action != ModerationAction.ALLOW:
-            logger.warning(f"Medical request detected: {medical_check.reason}")
-            return medical_check
-
-        # Step 3: Check for harmful content
-        harmful_check = self._check_harmful(user_prompt)
-        if harmful_check.action != ModerationAction.ALLOW:
-            logger.warning(f"Harmful content detected: {harmful_check.reason}")
-            return harmful_check
+        # Step 2: Check for general bias
+        bias_check = self._check_bias(user_prompt)
+        if bias_check.action != ModerationAction.ALLOW:
+            logger.warning(f"Bias detected: {bias_check.reason}")
+            return bias_check
 
         # If model response provided, check it
         if model_response:
@@ -237,187 +167,91 @@ Focus on improving your Chinese — what would you like to practice today?""",
             confidence=1.0,
         )
 
-    def _check_crisis(self, text: str) -> ModerationResult:
-        """
-        Check for crisis indicators.
-        
-        TODO: Implement crisis detection
-        
-        ALGORITHM:
-        1. Convert text to lowercase
-        2. Check against crisis_keywords:
-            - If found, set confidence = 0.7
-            - Track which keywords were found
-        3. Check against crisis_patterns:
-            - If matched, set confidence = 0.8-0.9
-            - Use re.search() for each pattern
-        4. If multiple matches, use MAXIMUM confidence
-        5. Get threshold for current safety_mode
-        6. If confidence >= threshold:
-            - Return BLOCK action
-            - Include crisis fallback_response
-            - Add descriptive tags
-        7. Otherwise return ALLOW
-        """
-
+    def _check_racial_bias(self, text: str) -> ModerationResult:
+        """Check for racial bias indicators."""
         text_lower = text.lower()
         confidence = 0.0
         detected_tags = []
 
-        # Check keywords
-        for keyword in self.crisis_keywords:
+        # Keywords
+        for keyword in self.racial_bias_keywords:
             if keyword in text_lower:
                 confidence = max(confidence, 0.7)
-                detected_tags.append(f"crisis_keyword:{keyword}")
+                detected_tags.append(f"racial_bias_keyword:{keyword}")
 
-        # Check regex patterns
-        for pattern in self.crisis_patterns:
+        # Regex patterns
+        for pattern in self.racial_bias_patterns:
             if re.search(pattern, text_lower):
                 confidence = max(confidence, 0.9)
-                detected_tags.append(f"crisis_pattern:{pattern}")
+                detected_tags.append(f"racial_bias_pattern:{pattern}")
 
-        crisis_threshold = self.confidence_thresholds[self.safety_mode]["crisis"]
+        threshold = self.confidence_thresholds[self.safety_mode]["racial_bias"]
 
-        if confidence >= crisis_threshold:
+        if confidence >= threshold:
             return ModerationResult(
                 action=ModerationAction.BLOCK,
                 tags=detected_tags,
-                reason="Crisis indicator detected.",
+                reason="Racial bias indicator detected.",
                 confidence=confidence,
-                fallback_response=self.fallback_templates["crisis"]
+                fallback_response=self.fallback_templates["racial_bias"]
             )
 
         return ModerationResult(
             action=ModerationAction.ALLOW,
             tags=[],
-            reason="No crisis indicators detected",
+            reason="No racial bias detected",
             confidence=confidence,
         )
 
-    def _check_medical(self, text: str) -> ModerationResult:
-        """
-        Check for medical requests.
-        
-        TODO: Implement medical request detection
-        
-        ALGORITHM:
-        1. Convert text to lowercase
-        2. Check against medical_keywords (confidence = 0.7)
-        3. Check against medical_patterns (confidence = 0.85)
-        4. Use maximum confidence if multiple matches
-        5. Compare against threshold for safety_mode
-        6. Return SAFE_FALLBACK if threshold exceeded
-        
-        Note: Use SAFE_FALLBACK, not BLOCK, for medical requests
-        """
+    def _check_bias(self, text: str) -> ModerationResult:
+        """Check for general bias indicators."""
         text_lower = text.lower()
         confidence = 0.0
         detected_tags = []
 
-        # Check keywords
-        for keyword in self.medical_keywords:
+        # Keywords
+        for keyword in self.bias_keywords:
             if keyword in text_lower:
                 confidence = max(confidence, 0.7)
-                detected_tags.append(f"medical_keyword:{keyword}")
+                detected_tags.append(f"bias_keyword:{keyword}")
 
-        # Check regex patterns
-        for pattern in self.medical_patterns:
+        # Regex patterns
+        for pattern in self.bias_patterns:
             if re.search(pattern, text_lower):
                 confidence = max(confidence, 0.85)
-                detected_tags.append(f"medical_pattern:{pattern}")
+                detected_tags.append(f"bias_pattern:{pattern}")
 
-        # FIXED LINE: Removed .value
-        medical_threshold = self.confidence_thresholds[self.safety_mode]["medical"]
+        threshold = self.confidence_thresholds[self.safety_mode]["bias"]
 
-        if confidence >= medical_threshold:
+        if confidence >= threshold:
             return ModerationResult(
                 action=ModerationAction.SAFE_FALLBACK,
                 tags=detected_tags,
-                reason="Medical request detected.",
+                reason="Bias detected.",
                 confidence=confidence,
-                fallback_response=self.fallback_templates["medical"]
+                fallback_response=self.fallback_templates["bias"]
             )
 
         return ModerationResult(
             action=ModerationAction.ALLOW,
             tags=[],
-            reason="No medical requests detected",
-            confidence=confidence,
-        )
-
-    def _check_harmful(self, text: str) -> ModerationResult:
-        """
-        Check for harmful content.
-        
-        TODO: Implement harmful content detection
-        
-        ALGORITHM:
-        1. Convert text to lowercase
-        2. For each category in harmful_content:
-            - Check if any keywords present
-            - Track which categories triggered
-        3. Set confidence = 0.75 for any match
-        4. Compare against threshold
-        5. Return BLOCK if threshold exceeded
-        
-        Include triggered categories in tags for debugging
-        """
-
-        text_lower = text.lower()
-        confidence = 0.0
-        detected_tags = []
-
-        for category, keywords in self.harmful_content.items():
-            for keyword in keywords:
-                if keyword in text_lower:
-                    confidence = max(confidence, 0.75)
-                    detected_tags.append(
-                        f"harmful:{category}_keyword:{keyword}")
-
-        # FIXED LINE: Removed .value
-        harmful_threshold = self.confidence_thresholds[self.safety_mode]["harmful"]
-
-        if confidence >= harmful_threshold:
-            return ModerationResult(
-                action=ModerationAction.BLOCK,
-                tags=detected_tags,
-                reason="Harmful content detected.",
-                confidence=confidence,
-                fallback_response=self.fallback_templates["harmful"]
-            )
-
-        return ModerationResult(
-            action=ModerationAction.ALLOW,
-            tags=[],
-            reason="No harmful content detected",
+            reason="No bias detected",
             confidence=confidence,
         )
 
     def _check_model_output(self, response: str) -> ModerationResult:
-        """
-        Check model output for policy violations.
-        
-        TODO: Ensure model didn't provide medical advice or break boundaries
-        
-        ALGORITHM:
-        1. Check for medical_keywords that shouldn't appear
-        2. Look for diagnosis-like statements
-        3. Check for treatment recommendations
-        4. Return SAFE_FALLBACK if violations found
-
-        """
-
+        """Check model output for bias-like statements."""
         response_lower = response.lower()
 
-        # Look for medical keywords in the model's response
-        for keyword in self.medical_keywords:
+        # Check for general bias in model's output
+        for keyword in self.bias_keywords + self.racial_bias_keywords:
             if keyword in response_lower:
                 return ModerationResult(
                     action=ModerationAction.SAFE_FALLBACK,
-                    tags=["model_output_medical_violation"],
-                    reason="Model's output contains medical advice keywords.",
+                    tags=["model_output_bias_violation"],
+                    reason="Model's output contains bias keywords.",
                     confidence=0.9,
-                    fallback_response=self.fallback_templates["medical"]
+                    fallback_response=self.fallback_templates["bias"]
                 )
 
         return ModerationResult(
@@ -428,23 +262,22 @@ Focus on improving your Chinese — what would you like to practice today?""",
         )
 
     def _check_context_patterns(self, context: List[Dict]) -> ModerationResult:
-
-        # Check for escalation
-        crisis_count = 0
+        """Check conversation history for repeated racial bias patterns."""
+        racial_bias_count = 0
         for turn in context:
             if turn.get("role") == "user":
                 content = turn.get("content", "").lower()
-                for keyword in self.crisis_keywords:
+                for keyword in self.racial_bias_keywords:
                     if keyword in content:
-                        crisis_count += 1
+                        racial_bias_count += 1
 
-        if crisis_count >= 3:
+        if racial_bias_count >= 3:
             return ModerationResult(
                 action=ModerationAction.SAFE_FALLBACK,
-                tags=["pattern_escalation", "repeated_crisis"],
-                reason="Escalating crisis pattern detected",
+                tags=["pattern_escalation", "repeated_racial_bias"],
+                reason="Escalating racial bias pattern detected",
                 confidence=0.8,
-                fallback_response=self.fallback_templates["crisis"],
+                fallback_response=self.fallback_templates["racial_bias"],
             )
 
         return ModerationResult(
