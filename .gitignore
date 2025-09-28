@@ -35,3 +35,6 @@ desktop.ini
 !reference_solution/tests/evaluation_inputs.jsonl
 local_models/
 session_logs/
+
+# User specific
+app/data/profiles.json

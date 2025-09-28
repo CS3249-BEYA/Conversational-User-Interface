@@ -28,7 +28,7 @@ TESTS_DIR = os.path.join(BASE_DIR, "tests")
 OUTPUTS_FILE = os.path.join(TESTS_DIR, "outputs.jsonl")
 SCHEMA_FILE = os.path.join(TESTS_DIR, "expected_schema.json")
 
-PROFILE_FILE = os.path.join(BASE_DIR, "app", "data", "profile.json")
+PROFILE_FILE = os.path.join(BASE_DIR, "app", "data", "profiles.json")   # Update to the same path as in app.py
 def _load_user_profile(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as f:

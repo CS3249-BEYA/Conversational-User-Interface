@@ -126,7 +126,7 @@ http://127.0.0.1:5000/
 3. Verify installation:
 
 ```powershell
-python --version
+python --version # alternatively `py --list`
 ```
 
 ---
@@ -169,7 +169,7 @@ ollama run phi3:medium "Hello"
 ### Step 5: Set Up Python Virtual Environment
 
 ```powershell
-python -m venv venv
+python -m venv venv # alternatively `py -V:3.11 -m venv venv`
 venv\Scripts\activate
 pip install -r requirements.txt
 ```

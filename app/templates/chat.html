@@ -118,6 +118,57 @@ body {
     0%, 80%, 100% { transform: scale(0); }
     40% { transform: scale(1); }
 }
+.empty-state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Take up all available space in chat-messages */
+    text-align: center;
+    padding: 2rem;
+}
+.topic-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 550px;
+}
+.starter-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid #e0f7ff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    text-align: center;
+}
+.starter-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    border-color: #93c5fd; /* Light blue hover border */
+}
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.card-title {
+    font-weight: 600;
+    color: #1e40af;
+    font-size: 0.95rem;
+}
+.card-subtitle {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+    line-height: 1.2;
+}
 </style>
 </head>
 <body>
@@ -126,7 +177,40 @@ body {
         Chinese Language Learning Bot 🌏
         <p class="text-sm mt-1 font-normal">Practice Mandarin with pinyin, translation, and grammar tips</p>
     </div>
-    <div id="chat-messages" class="chat-messages"></div>
+    <div id="chat-messages" class="chat-messages">
+        <div id="empty-state" class="empty-state-container">
+            <h2 class="text-2xl font-bold text-gray-800">Welcome! What would you like to practice today?</h2>
+            <p class="text-gray-500 mt-2">Click on a suggestion below to start our conversation.</p>
+        
+            <div class="topic-cards-grid">
+                <button 
+                    class="starter-card" 
+                    data-prompt="Translate 'I enjoy learning Chinese.'">
+                    <span class="card-icon">📚</span>
+                    <span class="card-title">Quick Translation</span>
+                    <span class="card-subtitle">"I enjoy learning Chinese."</span>
+                </button>
+
+                <button 
+                    class="starter-card" 
+                    data-prompt="Explain the difference between 会 (huì) and 能 (néng).">
+                    <span class="card-icon">🧠</span>
+                    <span class="card-title">Grammar Deep Dive</span>
+                    <span class="card-subtitle">Difference between 会 and 能</span>
+                </button>
+
+                <button 
+                    class="starter-card" 
+                    data-prompt="Let's practice ordering coffee in a café.">
+                    <span class="card-icon">💬</span>
+                    <span class="card-title">Scenario Practice</span>
+                    <span class="card-subtitle">Ordering Coffee</span>
+                </button>
+            </div>
+            
+            <p class="small-text text-gray-400 mt-4">You can also just type your question below.</p>
+        </div>
+    </div>
     <div class="input-area">
         <input id="user-input" type="text" placeholder="Type a sentence, ask for translation, or grammar tips..." autocomplete="off"/>
         <button id="send-button">Send</button>
@@ -137,8 +221,44 @@ body {
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
+const emptyState = document.getElementById('empty-state'); // Get the new empty state container
+const starterCards = document.querySelectorAll('.starter-card'); // Get all starter cards
+
+// Function to handle card clicks
+function handlePromptClick(event) {
+    const promptText = event.currentTarget.getAttribute('data-prompt');
+    userInput.value = promptText; 
+    userInput.focus(); 
+    // You could also call sendMessage() here if you want it to send immediately, 
+    // but placing it in the input field lets the user modify the prompt first.
+}
+
+// Attach the event listener to each card
+starterCards.forEach(card => {
+    card.addEventListener('click', handlePromptClick);
+});
+
+// Function to check if the chat is empty and show/hide the cards
+function updateChatState() {
+    // If chatMessages container only contains the empty state, show the empty state.
+    // Otherwise, hide it.
+    const hasMessages = chatMessages.children.length > 1 || 
+                        (chatMessages.children.length === 1 && chatMessages.children[0].id !== 'empty-state');
+    
+    if (hasMessages) {
+        emptyState.style.display = 'none';
+    } else {
+        emptyState.style.display = 'flex';
+    }
+}
+
+// Initial call to set the state (it should be visible initially)
+updateChatState();
 
 function appendMessage(text, type) {
+    // Hide the empty state/cards as soon as a message is appended
+    emptyState.style.display = 'none'; 
+    
     const row = document.createElement('div');
     row.className = 'message-row ' + (type === 'user-message' ? 'user-row' : 'assistant-row');
 
@@ -231,4 +351,3 @@ userInput.addEventListener('keypress', e => { if(e.key==='Enter') sendMessage();
 </script>
 </body>
 </html>
-"""
