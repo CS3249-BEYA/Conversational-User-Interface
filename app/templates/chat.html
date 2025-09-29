@@ -169,6 +169,28 @@ body {
     margin-top: 0.25rem;
     line-height: 1.2;
 }
+.quick-reply-btn {
+    /* Stronger visual contrast and depth */
+    padding: 0.6rem 1.25rem;
+    background-color: #ffffff; /* White background for contrast against chat background */
+    color: #2563eb; /* Strong blue text */
+    border: 2px solid #2563eb; /* Strong blue border */
+    border-radius: 9999px; /* Pill shape */
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600; /* Bolder text */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+    white-space: nowrap; 
+    width: 80%; 
+    max-width: 350px; 
+    text-align: left; 
+}
+.quick-reply-btn:hover {
+    background-color: #eff6ff; /* Very light blue background on hover */
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2); /* Stronger shadow on hover */
+    transform: translateY(-1px); /* Slight lift effect */
+}
 </style>
 </head>
 <body>
@@ -185,7 +207,8 @@ body {
             <div class="topic-cards-grid">
                 <button 
                     class="starter-card" 
-                    data-prompt="Translate 'I enjoy learning Chinese.'">
+                    data-prompt="Translate 'I enjoy learning Chinese.'"
+                    data-type="scenario-starter">
                     <span class="card-icon">📚</span>
                     <span class="card-title">Quick Translation</span>
                     <span class="card-subtitle">"I enjoy learning Chinese."</span>
@@ -193,7 +216,8 @@ body {
 
                 <button 
                     class="starter-card" 
-                    data-prompt="Explain the difference between 会 (huì) and 能 (néng).">
+                    data-prompt="Explain the difference between 会 (huì) and 能 (néng)."
+                    data-type="scenario-starter">
                     <span class="card-icon">🧠</span>
                     <span class="card-title">Grammar Deep Dive</span>
                     <span class="card-subtitle">Difference between 会 and 能</span>
@@ -201,7 +225,8 @@ body {
 
                 <button 
                     class="starter-card" 
-                    data-prompt="Let's practice ordering coffee in a café.">
+                    data-prompt="Let's do Scenario Practice!"
+                    data-type="scenario-starter">
                     <span class="card-icon">💬</span>
                     <span class="card-title">Scenario Practice</span>
                     <span class="card-subtitle">Ordering Coffee</span>
@@ -228,9 +253,18 @@ const starterCards = document.querySelectorAll('.starter-card'); // Get all star
 function handlePromptClick(event) {
     const promptText = event.currentTarget.getAttribute('data-prompt');
     userInput.value = promptText; 
-    userInput.focus(); 
-    // You could also call sendMessage() here if you want it to send immediately, 
-    // but placing it in the input field lets the user modify the prompt first.
+
+    const isScenarioStarter = event.currentTarget.getAttribute('data-type') === 'scenario-starter';
+    const isQuickReplyBtn = event.currentTarget.classList.contains('quick-reply-btn');
+
+
+    if (isScenarioStarter || isQuickReplyBtn) {
+        // Immediately send the scenario-starter prompt to the bot
+        sendMessage(); 
+    } else {
+        // For other cards (e.g., Quick Translation, Grammar), just load the text
+        userInput.focus(); 
+    }
 }
 
 // Attach the event listener to each card
@@ -279,6 +313,28 @@ function appendMessage(text, type) {
 
     row.appendChild(box);
     chatMessages.appendChild(row);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Function to create and display quick reply buttons from the AI response
+function appendQuickReplies(replies) {
+    const replyBar = document.createElement('div');
+    replyBar.className = 'quick-reply-bar assistant-row'; // Use the same flex styles
+
+    replies.forEach(reply => {
+        const button = document.createElement('button');
+        button.className = 'quick-reply-btn'; // Use the existing button styles
+        button.textContent = reply.text;
+        button.setAttribute('data-prompt', reply.prompt);
+        
+        // Attach the same click handler used by the initial cards
+        button.addEventListener('click', handlePromptClick);
+        
+        replyBar.appendChild(button);
+    });
+    
+    // Append the new button row to the chat messages area
+    chatMessages.appendChild(replyBar);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -339,6 +395,10 @@ async function sendMessage() {
         if(data.safety_action==='block') type='blocked-message';
         else if(data.safety_action==='safe_fallback') type='safe-fallback-message';
         appendMessage(data.response, type);
+
+        if (data.quick_replies && data.quick_replies.length > 0) {
+            appendQuickReplies(data.quick_replies);
+        }
     } catch(e) {
         hideLoading();
         appendMessage('An error occurred. Please try again later.', 'blocked-message');

@@ -82,6 +82,22 @@ class ChatEngine:
             disclaimer = self.moderator.get_disclaimer()
 
         input_moderation = self._moderate_input(user_input)
+
+        is_scenario_starter_prompt = user_input.strip() == (
+            "Let's do Scenario Practice!"
+        )
+
+        if is_scenario_starter_prompt:
+            # Skip model generation and go straight to response preparation
+            model_response = {
+                "response": "Great! Which topic would you like to practice? Click one of the options below to begin:",
+                "model": "deterministic_scenario",
+                "deterministic": True
+            }
+            output_moderation = ModerationResult(
+                action=ModerationAction.ALLOW, tags=[], reason="N/A", confidence=0.0
+            )
+
         if input_moderation.action == ModerationAction.BLOCK:
             final_response = self._prepare_final_response(
                 user_input=user_input,
@@ -126,16 +142,17 @@ class ChatEngine:
 
             return final_response
         
-        model_response = self._generate_response(
-            user_input,
-            include_context
-        )
-    
-        output_moderation = self._moderate_output(
-            user_input,
-            model_response["response"]
-        )
+        if not is_scenario_starter_prompt and input_moderation.action == ModerationAction.ALLOW:
+            model_response = self._generate_response(
+                user_input,
+                include_context
+            )
         
+            output_moderation = self._moderate_output(
+                user_input,
+                model_response["response"]
+            )
+            
         final_response = self._prepare_final_response(
             user_input=user_input,
             model_response=model_response,
@@ -151,6 +168,13 @@ class ChatEngine:
         final_response["latency_ms"] = int((time.time() - start_time) * 1000)
         final_response["turn_count"] = self.turn_count
         final_response["session_id"] = self.session_id
+
+        if is_scenario_starter_prompt:
+            final_response["quick_replies"] = [
+                { "text": "📧 Email HR Follow-up", "prompt": "Start a formal conversation about following up on a job application with a Chinese HR manager. I will speak first." },
+                { "text": "☕ Order Food/Meal", "prompt": "Start a casual conversation where I order a latte and a pastry at a busy café. You will speak first." },
+                { "text": "🗺️ Ask for Directions", "prompt": "Start a travel scenario where I'm lost and need to ask a stranger for directions to the nearest subway station. You will speak first." }
+            ]
         
         return final_response
     
