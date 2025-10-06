@@ -1,6 +1,5 @@
 """
-Model provider module for Ollama integration.
-This module is complete - students should NOT modify.
+Model provider module for openai integration.
 """
 
 import json
@@ -21,11 +20,17 @@ from .config import (
     get_model_config,
 )
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
 logger = logging.getLogger(__name__)
+logging.info("Logging is now configured!")
 
 
 class ModelProvider:
-    """Handles communication with Ollama API."""
+    """Handles communication with openai API."""
     
     def __init__(self):
         """Initialize the model provider with retry logic."""
@@ -103,7 +108,7 @@ class ModelProvider:
         try:
             logger.debug(f"Sending request to OpenAI with parameters: {api_params}")
             
-            # 4. API Call
+            # API Call
             completion = self.client.chat.completions.create(**api_params)
             
             response_text = completion.choices[0].message.content
@@ -182,3 +187,7 @@ def get_provider() -> ModelProvider:
     if _provider_instance is None:
         _provider_instance = ModelProvider()
     return _provider_instance
+
+logging.info("Creating ModelProvider instance")
+provider = get_provider()
+logging.info("ModelProvider instance created")
