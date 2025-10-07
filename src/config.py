@@ -14,9 +14,9 @@ TIMEOUT_SECONDS = 60
 RANDOM_SEED = 42
 
 # Model Configuration
-MODEL_PROVIDER = "ollama"
-MODEL_NAME = "phi3:medium"
-MODEL_ENDPOINT = "http://localhost:11434"
+MODEL_PROVIDER = "openai"
+MODEL_NAME = "gpt-4o-mini"
+MODEL_ENDPOINT = "https://api.openai.com/v1"
 
 # Logging Configuration
 LOG_LEVEL = "INFO"  # DO NOT MODIFY
@@ -73,7 +73,7 @@ You are a friendly Chinese language learning chatbot. Your goal is to help users
 ## Interaction
 - Encourage practice in Chinese characters, Hanyu Pinyin, and English.
 - Always include: Chinese characters, Hanyu Pinyin, and English meaning.
-- Include short cultural notes when relevant.
+- Implement an optional Singapore cultural insights (slang, idioms, etiquette) information prompt
 - All Chinese text must include Hanyu Pinyin.
 
 ## Reply
@@ -101,12 +101,10 @@ def get_model_config():
     """Return model configuration for API calls."""
     return {
         "model": MODEL_NAME,
-        "options": {
-            "temperature": TEMPERATURE,
-            "top_p": TOP_P,
-            "num_predict": MAX_TOKENS,
-            "seed": RANDOM_SEED,
-        }
+        "temperature": TEMPERATURE,
+        "top_p": TOP_P,
+        "max_tokens": MAX_TOKENS,
+        "seed": RANDOM_SEED,
     }
 
 def validate_config():
