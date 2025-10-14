@@ -1,6 +1,6 @@
-# Chinese Language Learning Chatbot - Installation Guide
+# Chinese Language Practise Chatbot - Installation Guide
 
-This guide explains how to install and run the **Chinese Language Learning Chatbot** locally using **Python** and the **OpenAI API**.
+This guide explains how to install and run the **Chinese Language Practise Chatbot** locally using **Python** and the **OpenAI API**.
 
 ---
 
@@ -123,7 +123,7 @@ Then open your browser to:
 http://127.0.0.1:5000/
 ```
 
-You can now chat with your **Chinese Language Learning Bot** powered by OpenAI!
+You can now chat with your **Chinese Language Practise Chatbot** powered by OpenAI!
 
 ---
 

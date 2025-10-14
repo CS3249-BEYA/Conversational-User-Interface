@@ -109,7 +109,7 @@ This chatbot’s purpose is to **help everyone learn Chinese respectfully**, wit
 For example, instead of stereotypes, we can learn neutral and polite phrases for describing people. Want to try?
             """,
 
-            "disclaimer": """Welcome to the Chinese Language Learning Assistant! 🌟
+            "disclaimer": """Welcome to your Chinese Language Practice Partner! 🌟
 
 NOTE:
 - This AI helps you practice and improve Mandarin.  

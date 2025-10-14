@@ -2,10 +2,9 @@
     "default_user": {
         "name": "eunice",
         "goal": [
-            "have_daily_conversations",
             "business_or_work",
-            "travel_confidently"
+            "have_daily_conversations"
         ],
-        "level": "advanced"
+        "level": "beginner"
     }
 }

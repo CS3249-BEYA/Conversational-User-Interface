@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chinese Language Learning Bot</title>
+<title>Chinese Language Practice Partner</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -99,6 +99,19 @@ body {
 #send-button:hover {
     background-color: #1e40af;
 }
+#clear-button {
+    margin-left: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #ef4444;
+    color: white;
+    font-weight: 600;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+#clear-button:hover {
+    background-color: #b91c1c;
+}
 .loading-dots {
     display: flex;
     align-items: center;
@@ -123,7 +136,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%; /* Take up all available space in chat-messages */
+    height: 100%;
     text-align: center;
     padding: 2rem;
 }
@@ -152,7 +165,7 @@ body {
 .starter-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-    border-color: #93c5fd; /* Light blue hover border */
+    border-color: #93c5fd;
 }
 .card-icon {
     font-size: 2rem;
@@ -170,75 +183,67 @@ body {
     line-height: 1.2;
 }
 .quick-reply-btn {
-    /* Stronger visual contrast and depth */
     padding: 0.6rem 1.25rem;
-    background-color: #ffffff; /* White background for contrast against chat background */
-    color: #2563eb; /* Strong blue text */
-    border: 2px solid #2563eb; /* Strong blue border */
-    border-radius: 9999px; /* Pill shape */
+    background-color: #ffffff;
+    color: #2563eb;
+    border: 2px solid #2563eb;
+    border-radius: 9999px;
     cursor: pointer;
     font-size: 0.9rem;
-    font-weight: 600; /* Bolder text */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
-    white-space: nowrap; 
-    width: 80%; 
-    max-width: 350px; 
-    text-align: left; 
+    white-space: nowrap;
+    width: 80%;
+    max-width: 350px;
+    text-align: left;
 }
 .quick-reply-btn:hover {
-    background-color: #eff6ff; /* Very light blue background on hover */
-    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2); /* Stronger shadow on hover */
-    transform: translateY(-1px); /* Slight lift effect */
+    background-color: #eff6ff;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+    transform: translateY(-1px);
 }
 </style>
 </head>
 <body>
 <div class="chat-container">
     <div class="chat-header">
-        Chinese Language Learning Bot 🌏
+        Chinese Language Practise Chatbot 🌏
         <p class="text-sm mt-1 font-normal">Practice Mandarin with pinyin, translation, and grammar tips</p>
     </div>
     <div id="chat-messages" class="chat-messages">
         <div id="empty-state" class="empty-state-container">
             <h2 class="text-2xl font-bold text-gray-800">Welcome! What would you like to practice today?</h2>
-            <p class="text-gray-500 mt-2">Click on a suggestion below to start our conversation.</p>
-        
+            <p class="text-gray-500 mt-2">Click on a scenario below to start practicing.</p>
             <div class="topic-cards-grid">
-                <button 
-                    class="starter-card" 
-                    data-prompt="Translate 'I enjoy learning Chinese.'"
-                    data-type="scenario-starter">
-                    <span class="card-icon">📚</span>
-                    <span class="card-title">Quick Translation</span>
-                    <span class="card-subtitle">"I enjoy learning Chinese."</span>
+                <button class="starter-card" data-prompt="Let's practice ordering food in a restaurant." data-type="scenario-starter">
+                    <span class="card-icon">🍜</span>
+                    <span class="card-title">Ordering Food</span>
+                    <span class="card-subtitle">Practice restaurant conversations</span>
                 </button>
-
-                <button 
-                    class="starter-card" 
-                    data-prompt="Explain the difference between 会 (huì) and 能 (néng)."
-                    data-type="scenario-starter">
-                    <span class="card-icon">🧠</span>
-                    <span class="card-title">Grammar Deep Dive</span>
-                    <span class="card-subtitle">Difference between 会 and 能</span>
+                <button class="starter-card" data-prompt="Let's practice asking for directions." data-type="scenario-starter">
+                    <span class="card-icon">🗺️</span>
+                    <span class="card-title">Asking Directions</span>
+                    <span class="card-subtitle">Navigate around the city</span>
                 </button>
-
-                <button 
-                    class="starter-card" 
-                    data-prompt="Let's do Scenario Practice!"
-                    data-type="scenario-starter">
-                    <span class="card-icon">💬</span>
-                    <span class="card-title">Scenario Practice</span>
-                    <span class="card-subtitle">Ordering Coffee</span>
+                <button class="starter-card" data-prompt="Let's practice shopping dialogues." data-type="scenario-starter">
+                    <span class="card-icon">🛍️</span>
+                    <span class="card-title">Shopping</span>
+                    <span class="card-subtitle">Practice buying clothes or groceries</span>
+                </button>
+                <button class="starter-card" data-prompt="Let's practice introducing yourself and meeting new people." data-type="scenario-starter">
+                    <span class="card-icon">👋</span>
+                    <span class="card-title">Meeting People</span>
+                    <span class="card-subtitle">Greetings and self-introduction</span>
                 </button>
             </div>
-            
-            <p class="small-text text-gray-400 mt-4">You can also just type your question below.</p>
+            <p class="small-text text-gray-400 mt-4">You can also just type the scenario you want to practice below.</p>
         </div>
     </div>
     <div class="input-area">
         <input id="user-input" type="text" placeholder="Type a sentence, ask for translation, or grammar tips..." autocomplete="off"/>
         <button id="send-button">Send</button>
+        <button id="clear-button">Clear Chat</button>
     </div>
 </div>
 
@@ -246,63 +251,35 @@ body {
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
-const emptyState = document.getElementById('empty-state'); // Get the new empty state container
-const starterCards = document.querySelectorAll('.starter-card'); // Get all starter cards
+const clearButton = document.getElementById('clear-button');
+const emptyState = document.getElementById('empty-state');
+const starterCards = document.querySelectorAll('.starter-card');
 
-// Function to handle card clicks
-function handlePromptClick(event) {
-    const promptText = event.currentTarget.getAttribute('data-prompt');
-    userInput.value = promptText; 
-
-    const isScenarioStarter = event.currentTarget.getAttribute('data-type') === 'scenario-starter';
-    const isQuickReplyBtn = event.currentTarget.classList.contains('quick-reply-btn');
-
-
-    if (isScenarioStarter || isQuickReplyBtn) {
-        // Immediately send the scenario-starter prompt to the bot
-        sendMessage(); 
-    } else {
-        // For other cards (e.g., Quick Translation, Grammar), just load the text
-        userInput.focus(); 
-    }
-}
-
-// Attach the event listener to each card
 starterCards.forEach(card => {
     card.addEventListener('click', handlePromptClick);
 });
 
-// Function to check if the chat is empty and show/hide the cards
-function updateChatState() {
-    // If chatMessages container only contains the empty state, show the empty state.
-    // Otherwise, hide it.
-    const hasMessages = chatMessages.children.length > 1 || 
-                        (chatMessages.children.length === 1 && chatMessages.children[0].id !== 'empty-state');
-    
-    if (hasMessages) {
-        emptyState.style.display = 'none';
+function handlePromptClick(event) {
+    const promptText = event.currentTarget.getAttribute('data-prompt');
+    userInput.value = promptText; 
+    const isScenarioStarter = event.currentTarget.getAttribute('data-type') === 'scenario-starter';
+    const isQuickReplyBtn = event.currentTarget.classList.contains('quick-reply-btn');
+    if (isScenarioStarter || isQuickReplyBtn) {
+        sendMessage(); 
     } else {
-        emptyState.style.display = 'flex';
+        userInput.focus(); 
     }
 }
 
-// Initial call to set the state (it should be visible initially)
-updateChatState();
-
 function appendMessage(text, type) {
-    // Hide the empty state/cards as soon as a message is appended
     emptyState.style.display = 'none'; 
-    
     const row = document.createElement('div');
     row.className = 'message-row ' + (type === 'user-message' ? 'user-row' : 'assistant-row');
-
     const box = document.createElement('div');
     box.className = 'message-box ' + type;
-
     const textNode = document.createElement('div');
     textNode.innerHTML = text;
     box.appendChild(textNode);
-
     if(type === 'assistant-message') {
         const speakBtn = document.createElement('button');
         speakBtn.textContent = '🔊 Speak';
@@ -310,43 +287,14 @@ function appendMessage(text, type) {
         speakBtn.onclick = () => speak(text);
         box.appendChild(speakBtn);
     }
-
     row.appendChild(box);
     chatMessages.appendChild(row);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Function to create and display quick reply buttons from the AI response
-function appendQuickReplies(replies) {
-    const replyBar = document.createElement('div');
-    replyBar.className = 'quick-reply-bar assistant-row'; // Use the same flex styles
-
-    replies.forEach(reply => {
-        const button = document.createElement('button');
-        button.className = 'quick-reply-btn'; // Use the existing button styles
-        button.textContent = reply.text;
-        button.setAttribute('data-prompt', reply.prompt);
-        
-        // Attach the same click handler used by the initial cards
-        button.addEventListener('click', handlePromptClick);
-        
-        replyBar.appendChild(button);
-    });
-    
-    // Append the new button row to the chat messages area
-    chatMessages.appendChild(replyBar);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
 async function speak(text) {
-    // Extract only Chinese characters
     const chineseOnly = text.match(/[\u4e00-\u9fff]+/g)?.join(" ");
-
-    if (!chineseOnly) {
-        console.log("No Chinese text to read.");
-        return;
-    }
-
+    if (!chineseOnly) return;
     try {
         const res = await fetch('/speak', {
             method: 'POST',
@@ -388,25 +336,28 @@ async function sendMessage() {
     userInput.value = '';
     showLoading();
     try {
-        const res = await fetch('/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({prompt}) });
+        const res = await fetch('/chat', { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({prompt}) 
+        });
         const data = await res.json();
         hideLoading();
-        let type = 'assistant-message';
-        if(data.safety_action==='block') type='blocked-message';
-        else if(data.safety_action==='safe_fallback') type='safe-fallback-message';
-        appendMessage(data.response, type);
-
-        if (data.quick_replies && data.quick_replies.length > 0) {
-            appendQuickReplies(data.quick_replies);
-        }
+        appendMessage(data.response, 'assistant-message');
     } catch(e) {
         hideLoading();
         appendMessage('An error occurred. Please try again later.', 'blocked-message');
-        console.error(e);
     }
 }
 
+function clearChat() {
+    chatMessages.innerHTML = '';
+    chatMessages.appendChild(emptyState);
+    emptyState.style.display = 'flex';
+}
+
 sendButton.addEventListener('click', sendMessage);
+clearButton.addEventListener('click', clearChat);
 userInput.addEventListener('keypress', e => { if(e.key==='Enter') sendMessage(); });
 </script>
 </body>

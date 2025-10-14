@@ -1,6 +1,6 @@
-# Chinese Language Learning Chatbot
+# Chinese Language Practise Chatbot
 
-A friendly and interactive **Chinese language learning chatbot** that helps users practice Mandarin, improve vocabulary, understand grammar, and explore cultural context.
+A friendly and interactive **Chinese Language Practise Chatbot** that helps users practice Mandarin, improve vocabulary, understand grammar, and explore cultural context.
 Each response includes **Chinese characters**, **Hanyu Pinyin**, and **English translations** to enhance comprehension.
 
 ---
