@@ -1,3 +1,59 @@
+"""
+================================================================================
+Flask Web Service for Personalized Profile-Aware Chatbot
+================================================================================
+
+This module implements a Flask web application that serves as the frontend and API
+for a personalized chat engine. It manages user profiles, handles conversation flow,
+and provides Text-to-Speech (TTS) capabilities for audio responses.
+
+--------------------------------------------------------------------------------
+CORE COMPONENTS
+--------------------------------------------------------------------------------
+
+1.  Chat Engine Integration:
+    * Imports and initializes a global 'chat_engine' instance using
+      'get_engine()' from 'src.chat_engine'.
+    * The engine is initialized via an @app.before_request hook, ensuring it's
+      ready and potentially loaded with a user profile before any route is accessed.
+
+2.  Profile Management:
+    * Handles loading and saving user data to a local JSON file ('data/profiles.json').
+    * The root route ('/') checks for a 'default_user' profile:
+        * If a profile exists, it redirects to the main chat interface ('/chat_interface').
+        * If no profile exists, it redirects to the profiling quiz ('/profile_quiz').
+
+3.  Text-to-Speech (TTS):
+    * The '/speak' endpoint uses the 'gTTS' library to generate audio streams
+      (MPEG format) from text provided in a POST request.
+    * It automatically detects Chinese (zh-cn) or English text to select the
+      appropriate voice/language setting.
+
+--------------------------------------------------------------------------------
+API ENDPOINTS
+--------------------------------------------------------------------------------
+
+* / : Entry point. Redirects based on profile existence.
+* /profile_quiz : Serves the HTML page for the user profile questionnaire.
+* /submit_profile (POST) : Receives profile data, saves it as 'default_user',
+    and updates the global chat engine instance immediately.
+* /chat_interface : Serves the main HTML page for the chat application.
+* /chat (POST) : Receives a user prompt, processes it via 'chat_engine.process_message()',
+    and returns a structured JSON response (which may include multilingual text and
+    safety actions).
+* /disclaimer : Returns a JSON object containing a static educational disclaimer.
+* /speak (POST) : Generates and sends an MP3 audio file for the provided text.
+
+--------------------------------------------------------------------------------
+SETUP & EXECUTION
+--------------------------------------------------------------------------------
+
+* The parent directory is added to the system path to allow 'src' module imports.
+* The application runs on http://127.0.0.1:5000 in debug mode when executed
+    via 'if __name__ == "__main__":'.
+"""
+
+
 from src.chat_engine import get_engine
 import json
 from flask import Flask, request, jsonify, render_template, redirect, url_for
@@ -10,13 +66,15 @@ from flask import send_file, request
 # Add parent directory to path for src module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-app = Flask(__name__, template_folder='templates') # Specify templates folder
+app = Flask(__name__, template_folder='templates')  # Specify templates folder
 
 # Global chat engine instance
 chat_engine = None
 
 # Path for storing profiles
-PROFILE_DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'profiles.json')
+PROFILE_DATA_PATH = os.path.join(
+    os.path.dirname(__file__), 'data', 'profiles.json')
+
 
 def load_user_profiles():
     """Loads all user profiles from profiles.json."""
@@ -24,6 +82,7 @@ def load_user_profiles():
         return {}
     with open(PROFILE_DATA_PATH, 'r', encoding='utf-8') as f:
         return json.load(f)
+
 
 def save_user_profile(user_id, profile_data):
     """Saves a single user profile to profiles.json."""
@@ -41,11 +100,12 @@ def ensure_chat_engine():
     if chat_engine is None:
         chat_engine = get_engine()
         user_profiles = load_user_profiles()
-        if 'default_user' in user_profiles: # Check for a default profile
+        if 'default_user' in user_profiles:  # Check for a default profile
             chat_engine.set_user_profile(user_profiles['default_user'])
             print("Loaded default user profile into chat engine.")
         else:
-            print("No default user profile found. Chat engine running without profile data.")
+            print(
+                "No default user profile found. Chat engine running without profile data.")
 
 
 @app.route("/")
@@ -58,10 +118,12 @@ def index():
     else:
         return redirect(url_for('profile_quiz'))
 
+
 @app.route("/profile_quiz")
 def profile_quiz():
     """Serves the profiling quiz HTML page."""
     return render_template('profile_quiz.html')
+
 
 @app.route("/submit_profile", methods=["POST"])
 def submit_profile():
@@ -84,12 +146,12 @@ def submit_profile():
             chat_engine = get_engine()
             chat_engine.set_user_profile(data)
 
-
         print(f"Profile saved for {user_id}: {data}")
         return jsonify({"message": "Profile saved successfully!"}), 200
     except Exception as e:
         print(f"Error submitting profile: {e}")
         return jsonify({"message": "Error saving profile."}), 500
+
 
 @app.route("/chat_interface")
 def chat_interface():
@@ -130,6 +192,7 @@ def chat():
         print(f"Error processing chat: {e}")
         return jsonify({"response": [{"chinese": "抱歉，服务器发生错误。", "pinyin": "Bàoqiàn, fúwùqì fāshēng cuòwù.", "english": "Sorry, a server error occurred."}], "safety_action": "block"}), 500
 
+
 @app.route("/speak", methods=["POST"])
 def speak():
     data = request.get_json()
@@ -148,8 +211,17 @@ def speak():
 
     return send_file(audio_io, mimetype="audio/mpeg")
 
+
 if __name__ == "__main__":
     # Create data directory if it doesn't exist
     os.makedirs('data', exist_ok=True)
-    # app.run(debug=True, host='0.0.0.0', port=5001) # For external access
-    app.run(debug=True, host='127.0.0.1', port=5000)
+
+    host = '127.0.0.1'
+    port = 5000
+
+    print("\n----------------------------------------")
+    print(f"🚀 Your app is running! Access it here:")
+    print(f"👉 http://{host}:{port}")
+    print("----------------------------------------\n")
+
+    app.run(debug=True, host=host, port=port)

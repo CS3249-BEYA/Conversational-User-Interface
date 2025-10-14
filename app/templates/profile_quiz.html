@@ -1,168 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chinese Bot: Your Profile</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f0f4ff 0%, #e0f7ff 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 1.5rem;
-            box-sizing: border-box;
-        }
-        .form-container {
-            background-color: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 2.5rem;
-            max-width: 700px;
-            width: 100%;
-            text-align: center;
-        }
-        .form-header {
-            color: #2563eb;
-            font-size: 1.875rem; /* 30px */
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-        .form-description {
-            color: #4b5563;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            border: 1px solid #cbd5e1;
-            outline: none;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-        }
-        .submit-button {
-            width: 100%;
-            padding: 1rem;
-            background-color: #2563eb;
-            color: white;
-            font-weight: 600;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 1.125rem;
-            border: none;
-        }
-        .submit-button:hover {
-            background-color: #1e40af;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chinese Bot: Your Profile Quiz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e0f7ff 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+.form-container {
+  background-color: #ffffff;
+  border-radius: 2rem;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  padding: 3rem 2.5rem;
+  max-width: 700px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.form-header {
+  color: #2563eb;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.form-description {
+  color: #4b5563;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+.form-step {
+  transition: all 0.3s ease;
+}
+.form-group {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+.option-button {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  background-color: #f3f4f6;
+  color: #111827;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.option-button:hover {
+  background-color: #2563eb;
+  color: white;
+  border-color: #1e40af;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.option-button.selected {
+  background-color: #1e40af;
+  color: white;
+  border-color: #1e40af;
+}
+.nav-button, .submit-button {
+  padding: 1rem 2rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  border: none;
+  margin-top: 1rem;
+}
+.nav-button {
+  background-color: #e5e7eb;
+  color: #111827;
+  margin-right: 0.5rem;
+}
+.nav-button:hover {
+  background-color: #2563eb;
+  color: white;
+}
+.submit-button {
+  background-color: #2563eb;
+  color: white;
+  width: 100%;
+}
+.submit-button:hover {
+  background-color: #1e40af;
+}
+.progress-container {
+  width: 100%;
+  background-color: #e5e7eb;
+  border-radius: 1rem;
+  margin-bottom: 2.5rem;
+  height: 14px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background-color: #2563eb;
+  transition: width 0.4s ease;
+}
+.hidden { display: none; }
+</style>
 </head>
 <body>
-    <div class="form-container">
-        <h1 class="form-header">Tell Us About Yourself! ✍️</h1>
-        <p class="form-description">
-            Help us tailor your Chinese learning experience. This information will help your bot tutor understand your needs better.
-        </p>
-        <form id="profile-form">
-            <div class="form-group">
-                <label for="name">Your Name</label>
-                <input type="text" id="name" name="name" placeholder="e.g., Alex" maxlength="50" required>
-            </div>
-            <div class="form-group">
-                <label for="level">Current Mandarin Level</label>
-                <select id="level" name="level" required>
-                    <option value="">Select your level</option>
-                    <option value="beginner">Beginner (Hanyu Pinyin, basic words)</option>
-                    <option value="intermediate">Intermediate (Short sentences, common phrases)</option>
-                    <option value="advanced">Advanced (Conversational, reading news)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="goal">Your Overall Learning Goal</label>
-                <textarea id="goal" name="goal" rows="3" placeholder="e.g., Have daily conversations, read a book, travel confidently" required maxlength="200"></textarea>
-            </div>
 
-            <div class="form-group">
-                <label for="speaking_confidence">How confident are you in speaking Chinese?</label>
-                <select id="speaking_confidence" name="speaking_confidence" required>
-                    <option value="">Select confidence level</option>
-                    <option value="not_confident">Not confident at all</option>
-                    <option value="somewhat_confident">Somewhat confident</option>
-                    <option value="confident">Confident</option>
-                    <option value="very_confident">Very confident</option>
-                </select>
-            </div>
+<div class="form-container">
+  <h1 class="form-header">Set Up Your Profile</h1>
+  <p class="form-description">Take this short quiz to personalize your Chinese learning experience.</p>
 
-            <div class="form-group">
-                <label for="hanzi_exposure">Have you ever been exposed to Chinese characters (Hanzi) before?</label>
-                <select id="hanzi_exposure" name="hanzi_exposure" required>
-                    <option value="">Select an option</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                </select>
-            </div>
+  <div class="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
 
-            <div class="form-group">
-                <label for="pinyin_knowledge">Do you know how to read or write pinyin?</label>
-                <select id="pinyin_knowledge" name="pinyin_knowledge" required>
-                    <option value="">Select an option</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                </select>
-            </div>
-
-            <button type="submit" class="submit-button">Start Learning! ✨</button>
-        </form>
+  <form id="profile-form">
+    <!-- Step 0: Name -->
+    <div class="form-step" data-step="0">
+      <div class="form-group">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="e.g., Alex" maxlength="50" required class="p-3 rounded-lg border border-gray-300 w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+      </div>
     </div>
 
-    <script>
-        const profileForm = document.getElementById('profile-form');
+    <!-- Step 1: Sentence comprehension -->
+    <div class="form-step hidden" data-step="1">
+      <div class="form-group">
+        <label>1️⃣ “我昨天去超市买了一些苹果和香蕉。” What did I buy?</label>
+        <div class="option-button" data-question="q1" data-value="A">Oranges and pears</div>
+        <div class="option-button" data-question="q1" data-value="B">Apples and bananas</div>
+        <div class="option-button" data-question="q1" data-value="C">Rice and noodles</div>
+        <div class="option-button" data-question="q1" data-value="D">Milk and bread</div>
+      </div>
+    </div>
 
-        profileForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(profileForm);
-            const data = Object.fromEntries(formData.entries());
+    <!-- Step 2: Tone recognition -->
+    <div class="form-step hidden" data-step="2">
+      <div class="form-group">
+        <label>2️⃣ Which pinyin matches the character “妈”?</label>
+        <div class="option-button" data-question="q2" data-value="A">mā</div>
+        <div class="option-button" data-question="q2" data-value="B">má</div>
+        <div class="option-button" data-question="q2" data-value="C">mǎ</div>
+        <div class="option-button" data-question="q2" data-value="D">mà</div>
+      </div>
+    </div>
 
-            try {
-                const res = await fetch('/submit_profile', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+    <!-- Step 3: Vocabulary -->
+    <div class="form-step hidden" data-step="3">
+      <div class="form-group">
+        <label>3️⃣ Choose the correct translation for “天气预报”</label>
+        <div class="option-button" data-question="q3" data-value="A">Weather forecast</div>
+        <div class="option-button" data-question="q3" data-value="B">Train schedule</div>
+        <div class="option-button" data-question="q3" data-value="C">Movie review</div>
+        <div class="option-button" data-question="q3" data-value="D">Shopping list</div>
+      </div>
+    </div>
 
-                if (res.ok) {
-                    window.location.href = '/chat_interface'; // Redirect to the main chat page
-                } else {
-                    // Attempt to parse error message if available
-                    const errorData = await res.json();
-                    alert(`Failed to save profile: ${errorData.message || 'Unknown error'}. Please try again.`);
-                }
-            } catch (error) {
-                console.error('Error submitting profile:', error);
-                alert('An error occurred. Please try again later.');
-            }
-        });
-    </script>
+    <!-- Step 4: Sentence construction -->
+    <div class="form-step hidden" data-step="4">
+      <div class="form-group">
+        <label>4️⃣ Which is the correct sentence order?</label>
+        <div class="option-button" data-question="q4" data-value="A">我 吃 苹果 每天</div>
+        <div class="option-button" data-question="q4" data-value="B">我 每天 吃 苹果</div>
+        <div class="option-button" data-question="q4" data-value="C">苹果 我 每天 吃</div>
+        <div class="option-button" data-question="q4" data-value="D">每天 我 苹果 吃</div>
+      </div>
+    </div>
+
+    <!-- Step 5: Learning goal (multi-select) -->
+    <div class="form-step hidden" data-step="5">
+      <div class="form-group">
+        <label>Your Overall Learning Goal (Select all that apply)</label>
+        <div class="option-button multi-select" data-question="goal_mcq" data-value="have_daily_conversations">Have daily conversations</div>
+        <div class="option-button multi-select" data-question="goal_mcq" data-value="read_books">Read Chinese books/articles</div>
+        <div class="option-button multi-select" data-question="goal_mcq" data-value="travel_confidently">Travel confidently in China</div>
+        <div class="option-button multi-select" data-question="goal_mcq" data-value="business_or_work">Use Chinese for work/business</div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="form-group">
+      <button type="button" class="nav-button" id="back-btn">Back</button>
+      <button type="button" class="nav-button" id="next-btn">Next</button>
+      <button type="submit" class="submit-button hidden" id="submit-btn">Submit Profile ✨</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+const correctAnswers = { q1: 'B', q2: 'A', q3: 'A', q4: 'B' };
+const selectedAnswers = {};
+const steps = document.querySelectorAll('.form-step');
+const progressBar = document.getElementById('progress-bar');
+const backBtn = document.getElementById('back-btn');
+const nextBtn = document.getElementById('next-btn');
+const submitBtn = document.getElementById('submit-btn');
+
+let currentStep = 0;
+
+function showStep(step) {
+  steps.forEach((s, idx) => s.classList.toggle('hidden', idx !== step));
+  backBtn.style.display = step === 0 ? 'none' : 'inline-block';
+  nextBtn.style.display = step === steps.length - 1 ? 'none' : 'inline-block';
+  submitBtn.classList.toggle('hidden', step !== steps.length - 1);
+  progressBar.style.width = ((step)/(steps.length-1))*100+'%';
+}
+
+showStep(currentStep);
+
+backBtn.addEventListener('click', () => { if(currentStep>0){currentStep--; showStep(currentStep);} });
+nextBtn.addEventListener('click', ()=>{
+  const currentStepDiv = steps[currentStep];
+  const qName = currentStepDiv.querySelector('.option-button')?.dataset.question;
+  if(qName && (!selectedAnswers[qName] || (Array.isArray(selectedAnswers[qName]) && selectedAnswers[qName].length===0))){
+    alert('Please select an option before continuing.');
+    return;
+  }
+  if(currentStep<steps.length-1){currentStep++; showStep(currentStep);}
+});
+
+// Single choice
+document.querySelectorAll('.option-button:not(.multi-select)').forEach(button=>{
+  button.addEventListener('click', ()=>{
+    const question = button.dataset.question;
+    document.querySelectorAll(`.option-button[data-question="${question}"]`).forEach(btn=>btn.classList.remove('selected'));
+    button.classList.add('selected');
+    selectedAnswers[question]=button.dataset.value;
+  });
+});
+// Multi select
+document.querySelectorAll('.option-button.multi-select').forEach(button=>{
+  button.addEventListener('click', ()=>{
+    const question = button.dataset.question;
+    const value = button.dataset.value;
+    button.classList.toggle('selected');
+    if(!selectedAnswers[question]) selectedAnswers[question]=[];
+    if(button.classList.contains('selected')) selectedAnswers[question].push(value);
+    else selectedAnswers[question] = selectedAnswers[question].filter(v=>v!==value);
+  });
+});
+
+document.getElementById('profile-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  for(let i=1;i<steps.length;i++){
+    const qName = steps[i].querySelector('.option-button')?.dataset.question;
+    if(qName && (!selectedAnswers[qName] || (Array.isArray(selectedAnswers[qName]) && selectedAnswers[qName].length===0))){
+      alert('Please complete all questions.');
+      return;
+    }
+  }
+  // Score & level
+  let score=0;
+  for(const[key, correct] of Object.entries(correctAnswers)){
+    if(selectedAnswers[key]===correct) score++;
+  }
+  let level='beginner';
+  if(score>=2 && score<=3) level='intermediate';
+  else if(score>=4) level='advanced';
+
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  data.goal = selectedAnswers['goal_mcq'];
+  data.level = level;
+
+  try{
+    const res = await fetch('/submit_profile',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+    if(res.ok) window.location.href='/chat_interface';
+    else {
+      const errorData=await res.json();
+      alert(`Failed to save profile: ${errorData.message||'Unknown error'}`);
+    }
+  }catch(err){console.error(err); alert('An error occurred. Please try again.');}
+});
+</script>
 </body>
 </html>
