@@ -112,6 +112,19 @@ body {
 #clear-button:hover {
     background-color: #b91c1c;
 }
+#mic-button {
+    margin-left: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #10b981;
+    color: white;
+    font-weight: 600;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+#mic-button:hover {
+    background-color: #059669;
+}
 .loading-dots {
     display: flex;
     align-items: center;
@@ -242,6 +255,7 @@ body {
     </div>
     <div class="input-area">
         <input id="user-input" type="text" placeholder="Type a sentence, ask for translation, or grammar tips..." autocomplete="off"/>
+        <button id="mic-button">🎤</button>
         <button id="send-button">Send</button>
         <button id="clear-button">Clear Chat</button>
     </div>
@@ -252,6 +266,7 @@ const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const clearButton = document.getElementById('clear-button');
+const micButton = document.getElementById('mic-button');
 const emptyState = document.getElementById('empty-state');
 const starterCards = document.querySelectorAll('.starter-card');
 
@@ -359,6 +374,48 @@ function clearChat() {
 sendButton.addEventListener('click', sendMessage);
 clearButton.addEventListener('click', clearChat);
 userInput.addEventListener('keypress', e => { if(e.key==='Enter') sendMessage(); });
+
+/* ===== Speech Recognition (Audio Input) ===== */
+let recognition;
+let isRecording = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'zh-CN';
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+        isRecording = true;
+        micButton.textContent = '⏹️ Stop';
+    };
+
+    recognition.onend = () => {
+        isRecording = false;
+        micButton.textContent = '🎤';
+    };
+
+    recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+        }
+        userInput.value = transcript;
+    };
+} else {
+    micButton.disabled = true;
+    micButton.title = "Speech Recognition not supported in this browser.";
+}
+
+micButton.addEventListener('click', () => {
+    if (!recognition) return;
+    if (isRecording) {
+        recognition.stop();
+    } else {
+        recognition.start();
+    }
+});
 </script>
 </body>
 </html>
