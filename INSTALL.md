@@ -1,228 +1,170 @@
 # Chinese Language Learning Chatbot - Installation Guide
 
-This guide explains how to install and run the Chinese Language Learning Chatbot locally using Python and Ollama with the **Phi-3 Medium** model.
+This guide explains how to install and run the **Chinese Language Learning Chatbot** locally using **Python** and the **OpenAI API**.
 
 ---
 
-## Prerequisites
+## 🧩 Prerequisites
 
-
-# test 
-
-- Python 3.11+
-- 8GB RAM (minimum)
-- 10GB free disk space
-- Internet connection for initial setup
-- macOS or Windows
+* Python **3.11+**
+* 8GB RAM (minimum)
+* 10GB free disk space
+* Internet connection
+* macOS or Windows
 
 ---
 
-## macOS Installation
+## ⚙️ Installation Steps
 
-### Step 1: Install Python (if needed)
-
-```bash
-# Check Python version
-python3 --version
-
-# If Python 3.11+ not installed, use Homebrew:
-brew install python@3.11
-````
-
----
-
-### Step 2: Install Ollama
+### Step 1: Clone the Repository
 
 ```bash
-# Install via Homebrew
-brew install ollama
-
-# Or download from official website:
-# https://ollama.com/download/mac
-```
-
-Verify installation:
-
-```bash
-ollama --version
+git clone https://github.com/yourusername/chinese-chatbot.git
+cd chinese-chatbot
 ```
 
 ---
 
-### Step 3: Start Ollama Service
+### Step 2: Create a Python Virtual Environment
+
+**macOS / Linux:**
 
 ```bash
-# Start Ollama service (keep this terminal tab open!)
-ollama serve
-```
-
-> ⚠️ **Important:** Keep this terminal tab open while using the chatbot.
-> You will need to open a **new terminal tab/window** for subsequent steps.
-
----
-
-### Step 4: Pull the Phi-3 Medium Model
-
-In a **new terminal tab/window**, run:
-
-```bash
-# Pull Phi-3 Medium (~14B parameters)
-ollama pull phi3:medium
-```
-
----
-
-### Step 5: Test the Model
-
-```bash
-# In the same new tab
-ollama run phi3:medium "Hello, how are you?"
-
-# Exit with /bye
-```
-
----
-
-### Step 6: Set Up Python Virtual Environment
-
-```bash
-# In another terminal tab/window
 python3 -m venv venv
 source venv/bin/activate
 ```
 
----
-
-### Step 7: Install Python Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-### Step 8: Start the Chatbot
-
-```bash
-python -m app.app
-```
-
-Open your browser and navigate to:
-
-```
-http://127.0.0.1:5000/
-```
-
-> Now you can chat with your Chinese Language Learning Bot!
-
----
-
-## Windows Installation
-
-### Step 1: Install Python
-
-1. Download Python 3.11+ from [https://python.org](https://python.org)
-2. Check **Add Python to PATH** during installation
-3. Verify installation:
+**Windows (PowerShell):**
 
 ```powershell
-python --version # alternatively `py --list`
-```
-
----
-
-### Step 2: Install Ollama
-
-1. Download installer from [https://ollama.com/download/windows](https://ollama.com/download/windows)
-2. Run the installer (OllamaSetup.exe)
-3. Ollama will start automatically and appear in the system tray
-
----
-
-### Step 3: Start Ollama Service
-
-Open PowerShell:
-
-```powershell
-# Start Ollama service (keep this window open!)
-ollama serve
-```
-
-> Keep this window open. Open a **new PowerShell tab/window** for pulling models and running Python commands.
-
----
-
-### Step 4: Pull the Phi-3 Medium Model
-
-In the new terminal tab/window:
-
-```powershell
-ollama pull phi3:medium
-
-# Test the model
-ollama run phi3:medium "Hello"
-# Exit with /bye
-```
-
----
-
-### Step 5: Set Up Python Virtual Environment
-
-```powershell
-python -m venv venv # alternatively `py -V:3.11 -m venv venv`
+python -m venv venv
 venv\Scripts\activate
+```
+
+---
+
+### Step 3: Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
+
+Make sure your `requirements.txt` includes the following:
+
+```txt
+requests==2.31.0
+pydantic==2.5.0
+jsonschema==4.20.0
+python-dateutil==2.8.2
+typing-extensions==4.9.0
+colorama==0.4.6
+tqdm==4.66.1
+Flask==2.3.2
+gTTs==2.5.4
+openai==1.51.0
+python-dotenv==1.0.1
+```
+
+---
+
+### Step 4: Create a `.env` File
+
+In the project root, create a file named `.env`:
+
+```bash
+touch .env
+```
+
+Add your OpenAI API key:
+
+```bash
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+> ⚠️ Keep this file **private** and **never commit it** to GitHub.
+
+---
+
+### Step 5: Verify the OpenAI Setup
+
+You can test your configuration with a quick script:
+
+```python
+from dotenv import load_dotenv
+import os
+from openai import OpenAI
+
+load_dotenv()
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "你好！"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+If you see a response, everything’s working ✅
 
 ---
 
 ### Step 6: Start the Chatbot
 
-```powershell
+Run the app:
+
+```bash
 python -m app.app
 ```
 
-Visit in your browser:
+Then open your browser to:
 
 ```
 http://127.0.0.1:5000/
 ```
 
+You can now chat with your **Chinese Language Learning Bot** powered by OpenAI!
+
 ---
 
-## Troubleshooting
+## 🧠 Troubleshooting
 
-### Ollama Connection Errors
+### 🔹 Missing Packages
 
-```bash
-# Check if Ollama is running
-curl http://localhost:11434/api/tags
-
-# Restart Ollama
-# macOS:
-brew services restart ollama
-# Windows:
-# Right-click system tray icon → Quit, then restart
-
-# Check port isn't blocked
-lsof -i :11434  # macOS
-netstat -an | findstr :11434  # Windows
-```
-
-### Model Download Issues
+If you get `ModuleNotFoundError` for any module, reinstall dependencies:
 
 ```bash
-# Remove model and retry
-ollama rm phi3:medium
-ollama pull phi3:medium
-
-# Use --insecure if there are certificate issues
-ollama pull phi3:medium --insecure
+pip install -r requirements.txt
 ```
 
 ---
 
-### Notes
+### 🔹 Missing OpenAI Key
 
-* Always keep the **Ollama service tab running** while using the chatbot.
-* Use separate terminal tabs for Python environment setup, dependency installation, and running the chatbot.
+Make sure:
+
+* `.env` file exists in your project root
+* It contains a valid `OPENAI_API_KEY`
+* You’ve activated your virtual environment before running the app
+
+---
+
+### 🔹 Updating Dependencies
+
+To update all installed packages to their latest compatible versions:
+
+```bash
+pip install -U -r requirements.txt
+```
+
+---
+
+## ✅ Notes
+
+* The chatbot uses **OpenAI GPT models** for generating Chinese learning conversations.
+* All secrets (API keys, etc.) should be stored securely in the `.env` file.
+* The web interface runs locally on **Flask**.
+
+---
+
+Would you like me to add a short **“Docker setup” section** too (so users can run it with one command, e.g., `docker compose up`)?

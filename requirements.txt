@@ -7,3 +7,5 @@ colorama==0.4.6
 tqdm==4.66.1
 Flask==2.3.2
 gTTs==2.5.4
+openai==1.51.0
+python-dotenv==1.0.1
