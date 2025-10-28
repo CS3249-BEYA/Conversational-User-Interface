@@ -166,5 +166,3 @@ pip install -U -r requirements.txt
 * The web interface runs locally on **Flask**.
 
 ---
-
-Would you like me to add a short **“Docker setup” section** too (so users can run it with one command, e.g., `docker compose up`)?
