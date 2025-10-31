@@ -75,6 +75,9 @@ chat_engine = None
 PROFILE_DATA_PATH = os.path.join(
     os.path.dirname(__file__), 'data', 'profiles.json')
 
+USAGE_LOG_PATH = os.path.join(os.path.dirname(__file__), 'data', 'usage_log.json')
+
+
 
 def load_user_profiles():
     """Loads all user profiles from profiles.json."""
@@ -83,6 +86,27 @@ def load_user_profiles():
     with open(PROFILE_DATA_PATH, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+def load_usage_log():
+    """Loads all recorded usage dates."""
+    if not os.path.exists(USAGE_LOG_PATH):
+        return []
+    try:
+        with open(USAGE_LOG_PATH, 'r', encoding='utf-8') as f: 
+            return json.load(f)
+    except json.JSONDecodeError:
+        return []
+
+def save_usage_date():
+    """Adds today's date if not already recorded."""
+    from datetime import date
+    today = str(date.today())
+    data = load_usage_log()
+    if today not in data:
+        data.append(today)
+        os.makedirs(os.path.dirname(USAGE_LOG_PATH), exist_ok=True)
+        with open(USAGE_LOG_PATH, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    return data
 
 def save_user_profile(user_id, profile_data):
     """Saves a single user profile to profiles.json."""
@@ -153,11 +177,28 @@ def submit_profile():
         return jsonify({"message": "Error saving profile."}), 500
 
 
+# @app.route("/chat_interface")
+# def chat_interface():
+#     """Serves the main chat interface HTML page."""
+#     return render_template('chat.html')
+
 @app.route("/chat_interface")
 def chat_interface():
     """Serves the main chat interface HTML page."""
+    try:
+        save_usage_date()
+    except Exception as e:
+        print(f"⚠️ Failed to record usage date: {e}")
     return render_template('chat.html')
 
+@app.route("/usage_log")
+def usage_log():
+    """Returns all recorded usage dates."""
+    try:
+        return jsonify(load_usage_log())
+    except Exception as e:
+        print(f"Error loading usage log: {e}")
+        return jsonify([]), 500
 
 @app.route("/disclaimer")
 def disclaimer():

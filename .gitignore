@@ -38,4 +38,5 @@ session_logs/
 
 # User specific
 app/data/profiles.json
+app/data/usage_log.json
 .env

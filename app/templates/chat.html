@@ -6,6 +6,7 @@
 <title>Chinese Language Practice Partner</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
 body {
     font-family: 'Inter', sans-serif;
@@ -152,6 +153,7 @@ body {
     height: 100%;
     text-align: center;
     padding: 2rem;
+    padding-top: 5rem;
 }
 .topic-cards-grid {
     display: grid;
@@ -216,14 +218,118 @@ body {
     box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
     transform: translateY(-1px);
 }
+/* --- Calendar Style Updates --- */
+/* Common Day Style */
+.calendar-day-cell {
+    text-align: center;
+    padding: 0.5rem 0;
+    border-radius: 0.5rem;
+    background-color: #f1f5f9; /* Default Day Background (Light Gray) */
+    cursor: default;
+    font-weight: 500;
+    position: relative; /* For icon positioning */
+    display: flex; /* Centering content */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 40px; /* Uniform height for better grid alignment */
+    line-height: 1;
+    color: #334155;
+}
+/* Day of the Week Header Style */
+.day-of-week {
+    text-align: center;
+    padding-bottom: 0.5rem;
+    font-weight: 600;
+    color: #64748b; /* Medium Gray */
+}
+/* Checked-in/Used Day Style */
+.calendar-day-cell.used-day {
+    background-color: #dbeafe; /* Light Blue Background */
+    color: #1e40af; /* Dark Blue Text */
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1); /* Subtle shadow */
+    overflow: hidden; /* Ensure icon stays within bounds */
+}
+/* Checkmark Icon for Used Days */
+.calendar-day-cell.used-day::after {
+    content: '✓'; /* Using a simple checkmark */
+    font-family: 'Font Awesome 5 Free'; /* Required if using FA icons, but here using a simple char */
+    font-weight: 900;
+    color: #2563eb; /* Primary Blue for the checkmark */
+    position: absolute;
+    top: -5px; /* Adjust vertical position */
+    right: -2px; /* Adjust horizontal position */
+    font-size: 1.2rem;
+    opacity: 0.8;
+    transform: rotate(15deg); /* Slight rotation for flair */
+}
+/* Today's Day Style (Highlighting the current date) */
+.calendar-day-cell.today {
+    background-color: #fffbe6; /* Light Yellow Background */
+    border: 2px solid #f59e0b; /* Yellow Border */
+    font-weight: 700;
+    color: #b45309; /* Darker Yellow Text */
+}
+/* Style for days that are today AND used */
+.calendar-day-cell.used-day.today {
+    background-color: #93c5fd; /* Blend of blue/yellow for today + used */
+    color: white;
+    border: 2px solid #3b82f6;
+}
+/* Styling for the popup container */
+#calendar-popup > div {
+    /* Adjusted styles for a more modern popup */
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 1rem;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    width: 350px; /* Slightly wider calendar */
+}
+/* Day of the Week Grid */
+#calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem; /* Smaller gap for tighter look */
+}
+
 </style>
 </head>
 <body>
 <div class="chat-container">
+    <div class="calendar-container absolute top-4 right-4 z-10"> 
+        <button id="calendar-button" class="px-4 py-2 bg-yellow-400 text-white rounded-full shadow hover:bg-yellow-500 font-semibold text-base">
+            📅 Check-in
+        </button>
+    </div>
+
+    <div id="calendar-popup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm relative">
+            <h3 class="text-xl font-bold mb-4 text-center text-gray-800">Practice Streak 💪</h3>
+            <p id="streak-counter" class="text-base text-center mb-4 text-green-600 font-bold">加载中...</p>
+            <div id="day-of-week-labels" class="grid grid-cols-7 gap-2 mb-2">
+                <div class="day-of-week">Sun</div>
+                <div class="day-of-week">Mon</div>
+                <div class="day-of-week">Tue</div>
+                <div class="day-of-week">Wed</div>
+                <div class="day-of-week">Thu</div>
+                <div class="day-of-week">Fri</div>
+                <div class="day-of-week">Sat</div>
+            </div>
+            
+            <div id="calendar-days" class="grid grid-cols-7 gap-2">
+                </div>
+            
+            <button id="close-calendar" class="absolute top-3 right-3 text-xl text-gray-500 hover:text-gray-800 focus:outline-none">
+                &times;
+            </button>
+        </div>
+    </div>
+
     <div class="chat-header">
         Chinese Language Practise Chatbot 🌏
         <p class="text-sm mt-1 font-normal">Practice Mandarin with pinyin, translation, and grammar tips</p>
     </div>
+    
     <div id="chat-messages" class="chat-messages">
         <div id="empty-state" class="empty-state-container">
             <h2 class="text-2xl font-bold text-gray-800">Welcome! What would you like to practice today?</h2>
@@ -416,6 +522,168 @@ micButton.addEventListener('click', () => {
         recognition.start();
     }
 });
+
+/* ===== Gamification (Calendar Tracker) ===== */
+const calendarButton = document.getElementById('calendar-button');
+const calendarPopup = document.getElementById('calendar-popup');
+const closeCalendar = document.getElementById('close-calendar');
+const calendarDays = document.getElementById('calendar-days');
+const streakCounter = document.getElementById('streak-counter');
+
+calendarButton.addEventListener('click', () => {
+    loadUsageCalendar(); // Load fresh data on manual click
+    calendarPopup.classList.remove('hidden');
+});
+closeCalendar.addEventListener('click', () => calendarPopup.classList.add('hidden'));
+
+async function loadUsageCalendar() {
+    const dates = await fetch("/usage_log")
+        .then(res => res.json())
+        .catch(() => []);
+    const dateSet = new Set(dates);
+
+    calendarDays.innerHTML = '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+
+    const year = today.getFullYear();
+    const month = today.getMonth(); // 0-indexed
+
+    const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Sunday, 6=Saturday
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Add empty cells for preceding days in the first week
+    for(let i = 0; i < firstDayOfWeek; i++){
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day-cell bg-transparent shadow-none'; 
+        calendarDays.appendChild(emptyCell);
+    }
+
+    // Add day cells
+    for(let d = 1; d <= daysInMonth; d++){
+        const cell = document.createElement('div');
+        cell.textContent = d;
+        cell.className = 'calendar-day-cell'; 
+
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        if(dateSet.has(dateStr)) {
+            cell.classList.add('used-day');
+        }
+        if(d === today.getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+            cell.classList.add('today');
+        }
+        
+        calendarDays.appendChild(cell);
+    }
+
+    // Streak Calculation Logic
+    let streak = 0;
+    let checkDate = new Date();
+    checkDate.setHours(0, 0, 0, 0);
+
+    // Normalize yesterday's date
+    const yesterday = new Date(checkDate);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // Get today's and yesterday's string
+    const dateToString = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const todayStr = dateToString(checkDate);
+    const yesterdayStr = dateToString(yesterday);
+
+    // Determine starting point
+    if (dateSet.has(todayStr)) {
+        streak = 1;
+        checkDate.setDate(checkDate.getDate() - 1); // Start checking from yesterday
+    } else if (dateSet.has(yesterdayStr)) {
+        // If today is a gap but yesterday was checked, streak is 0 (it broke), 
+        // but for display, we show 0 days if today is missed. 
+        // We only check continuity up to yesterday if today is missed.
+        streak = 0; // If today is missed, the streak is over.
+        streakCounter.textContent = `连续打卡: 0 天 (昨天断了 😔)`;
+        return;
+    } else {
+        streak = 0;
+    }
+    
+    // Check backwards from the relevant date
+    while (true) {
+        const dateStr = dateToString(checkDate);
+        
+        if (dateSet.has(dateStr)) {
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1); // Go to previous day
+        } else {
+            break; // Gap found
+        }
+    }
+
+    streakCounter.textContent = `连续打卡: ${streak} 天 🎉`;
+}
+
+
+function checkAndDisplayCalendarOnLoad() {
+    const today = new Date().toDateString(); // e.g., "Fri Nov 01 2025"
+    const lastDisplayDate = localStorage.getItem('lastCalendarDisplayDate');
+
+    // Load calendar data regardless of auto-display, so manual click is fast
+    loadUsageCalendar(); 
+
+    if (lastDisplayDate !== today) {
+        // This is the first visit of the day
+        document.getElementById('calendar-popup').classList.remove('hidden');
+        localStorage.setItem('lastCalendarDisplayDate', today);
+    }
+}
+
+window.addEventListener('load', checkAndDisplayCalendarOnLoad);// async function loadUsageCalendar() {
+//     // Note: Assuming /usage_log returns an array of date strings, e.g., ["2025-11-01", "2025-10-31"]
+//     const dates = await fetch("/usage_log")
+//         .then(res => res.json())
+//         .catch(() => []); // Handle error gracefully, default to empty array
+
+//     console.log("已使用日期：", dates);
+
+//     calendarDays.innerHTML = '';
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0); // Normalize 'today' to start of day
+
+//     const year = today.getFullYear();
+//     const month = today.getMonth(); // 0-indexed
+
+//     // Calculate the day of the week for the 1st of the month (0=Sunday, 6=Saturday)
+//     const firstDayOfWeek = new Date(year, month, 1).getDay(); 
+//     const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+//     // 1. Add empty cells for preceding days in the first week
+//     for(let i = 0; i < firstDayOfWeek; i++){
+//         const emptyCell = document.createElement('div');
+//         emptyCell.className = 'calendar-day-cell bg-transparent shadow-none'; // Use transparent background for padding
+//         calendarDays.appendChild(emptyCell);
+//     }
+
+//     // 2. Add day cells
+//     for(let d = 1; d <= daysInMonth; d++){
+//         const cell = document.createElement('div');
+//         cell.textContent = d;
+//         cell.className = 'calendar-day-cell'; // Apply base style
+
+//         // Construct date string for comparison
+//         const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        
+//         // Check if the date is a used day (checked in)
+//         if(dates.includes(dateStr)) {
+//             cell.classList.add('used-day');
+//         }
+
+//         // Check if the date is today
+//         if(d === today.getDate()) {
+//             cell.classList.add('today');
+//         }
+        
+//         calendarDays.appendChild(cell);
+//     }
+// }
+
 </script>
 </body>
 </html>
