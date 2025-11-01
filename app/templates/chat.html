@@ -7,6 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
 body {
     font-family: 'Inter', sans-serif;
@@ -220,77 +221,93 @@ body {
     transform: translateY(-1px);
 }
 /* --- Calendar Style Updates --- */
-/* Common Day Style */
 .calendar-day-cell {
     text-align: center;
     padding: 0.5rem 0;
     border-radius: 0.5rem;
-    background-color: #f1f5f9; /* Default Day Background (Light Gray) */
+    background-color: #f1f5f9;
     cursor: default;
     font-weight: 500;
-    position: relative; /* For icon positioning */
-    display: flex; /* Centering content */
+    position: relative;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 40px; /* Uniform height for better grid alignment */
+    height: 40px;
     line-height: 1;
     color: #334155;
 }
-/* Day of the Week Header Style */
 .day-of-week {
     text-align: center;
     padding-bottom: 0.5rem;
     font-weight: 600;
-    color: #64748b; /* Medium Gray */
+    color: #64748b;
 }
-/* Checked-in/Used Day Style */
 .calendar-day-cell.used-day {
-    background-color: #dbeafe; /* Light Blue Background */
-    color: #1e40af; /* Dark Blue Text */
-    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1); /* Subtle shadow */
-    overflow: hidden; /* Ensure icon stays within bounds */
+    background-color: #dbeafe;
+    color: #1e40af;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+    overflow: hidden;
 }
-/* Checkmark Icon for Used Days */
 .calendar-day-cell.used-day::after {
-    content: '✓'; /* Using a simple checkmark */
-    font-family: 'Font Awesome 5 Free'; /* Required if using FA icons, but here using a simple char */
+    content: '✓';
+    font-family: 'Font Awesome 5 Free';
     font-weight: 900;
-    color: #2563eb; /* Primary Blue for the checkmark */
+    color: #2563eb;
     position: absolute;
-    top: -5px; /* Adjust vertical position */
-    right: -2px; /* Adjust horizontal position */
+    top: -5px;
+    right: -2px;
     font-size: 1.2rem;
     opacity: 0.8;
-    transform: rotate(15deg); /* Slight rotation for flair */
+    transform: rotate(15deg);
 }
-/* Today's Day Style (Highlighting the current date) */
 .calendar-day-cell.today {
-    background-color: #fffbe6; /* Light Yellow Background */
-    border: 2px solid #f59e0b; /* Yellow Border */
+    background-color: #fffbe6;
+    border: 2px solid #f59e0b;
     font-weight: 700;
-    color: #b45309; /* Darker Yellow Text */
+    color: #b45309;
 }
-/* Style for days that are today AND used */
 .calendar-day-cell.used-day.today {
-    background-color: #93c5fd; /* Blend of blue/yellow for today + used */
+    background-color: #93c5fd;
     color: white;
     border: 2px solid #3b82f6;
 }
-/* Styling for the popup container */
 #calendar-popup > div {
-    /* Adjusted styles for a more modern popup */
     background-color: #ffffff;
     padding: 24px;
     border-radius: 1rem;
     box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    width: 350px; /* Slightly wider calendar */
+    width: 350px;
 }
-/* Day of the Week Grid */
 #calendar-days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem; /* Smaller gap for tighter look */
+    gap: 0.5rem;
+}
+/* Flatpickr */
+.flatpickr-calendar {
+    /* remove original flatpickr border and shadow */
+    border: none !important;
+    box-shadow: none !important;
+    /* ensure it's in popup */
+    position: relative !important;
+    display: block !important;
+    margin: 0 auto;
+    width: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+}
+.flatpickr-calendar.open {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+.flatpickr-months {
+    padding: 0 0 10px 0;
+    border-bottom: 1px solid #e2e8f0; /* 分隔线 */
+}
+.dayContainer, .flatpickr-weekdays, .flatpickr-innerContainer {
+    display: none !important;
 }
 
 </style>
@@ -310,6 +327,11 @@ body {
             <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm relative">
                 <h3 class="text-xl font-bold mb-4 text-center text-gray-800">Practice Streak 💪</h3>
                 <p id="streak-counter" class="text-base text-center mb-4 text-green-600 font-bold">加载中...</p>
+                
+                <input type="text" id="flatpickr-hidden-input" style="position: absolute; left: -9999px;">
+                
+                <div id="flatpickr-container"></div>
+
                 <div id="day-of-week-labels" class="grid grid-cols-7 gap-2 mb-2">
                     <div class="day-of-week">Sun</div>
                     <div class="day-of-week">Mon</div>
@@ -321,7 +343,7 @@ body {
                 </div>
                 
                 <div id="calendar-days" class="grid grid-cols-7 gap-2">
-                    </div>
+                </div>
                 
                 <button id="close-calendar" class="absolute top-3 right-3 text-xl text-gray-500 hover:text-gray-800 focus:outline-none">
                     &times;
@@ -368,6 +390,8 @@ body {
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
 <script>
 const chatMessages = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
@@ -524,167 +548,138 @@ micButton.addEventListener('click', () => {
     }
 });
 
-/* ===== Gamification (Calendar Tracker) ===== */
+/* ===== FLATPICKR INTEGRATION & CALENDAR LOGIC ===== */
 const calendarButton = document.getElementById('calendar-button');
 const calendarPopup = document.getElementById('calendar-popup');
 const closeCalendar = document.getElementById('close-calendar');
 const calendarDays = document.getElementById('calendar-days');
 const streakCounter = document.getElementById('streak-counter');
+const flatpickrContainer = document.getElementById('flatpickr-container');
 
-calendarButton.addEventListener('click', () => {
-    loadUsageCalendar(); // Load fresh data on manual click
-    calendarPopup.classList.remove('hidden');
-});
-closeCalendar.addEventListener('click', () => calendarPopup.classList.add('hidden'));
+let fp;
 
-async function loadUsageCalendar() {
+function initializeFlatpickr() {
+    // add Flatpickr to hidden input
+    fp = flatpickr("#flatpickr-hidden-input", {
+        inline: true, 
+        appendTo: flatpickrContainer, 
+        defaultDate: new Date(),
+        locale: 'en', 
+        onChange: function(selectedDates, dateStr, instance) {
+        },
+        onMonthChange: function(selectedDates, dateStr, instance) {
+            // update calendar grid on month change
+            loadCustomCalendar(instance.currentYear, instance.currentMonth);
+        },
+        onYearChange: function(selectedDates, dateStr, instance) {
+            // update calendar grid on year change
+            loadCustomCalendar(instance.currentYear, instance.currentMonth);
+        },
+        onReady: function(selectedDates, dateStr, instance) {
+             // update calendar grid on initial load
+            loadCustomCalendar(instance.currentYear, instance.currentMonth);
+        }
+    });
+}
+
+async function loadCustomCalendar(year, month) {
+
     const dates = await fetch("/usage_log")
         .then(res => res.json())
-        .catch(() => []);
+        .catch(() => []); // 使用模拟数据
     const dateSet = new Set(dates);
 
     calendarDays.innerHTML = '';
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0); 
+    const dateToString = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const todayStr = dateToString(today);
 
-    const year = today.getFullYear();
-    const month = today.getMonth(); // 0-indexed
-
-    const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Sunday, 6=Saturday
+    const firstDayOfMonth = new Date(year, month, 1);
+    const firstDayOfWeek = firstDayOfMonth.getDay(); // 0=Sunday, 6=Saturday
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Add empty cells for preceding days in the first week
     for(let i = 0; i < firstDayOfWeek; i++){
         const emptyCell = document.createElement('div');
         emptyCell.className = 'calendar-day-cell bg-transparent shadow-none'; 
         calendarDays.appendChild(emptyCell);
     }
 
-    // Add day cells
     for(let d = 1; d <= daysInMonth; d++){
         const cell = document.createElement('div');
         cell.textContent = d;
         cell.className = 'calendar-day-cell'; 
 
         const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        
         if(dateSet.has(dateStr)) {
             cell.classList.add('used-day');
         }
-        if(d === today.getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+        
+        if(dateStr === todayStr) {
             cell.classList.add('today');
         }
         
         calendarDays.appendChild(cell);
     }
 
-    // Streak Calculation Logic
-    let streak = 0;
-    let checkDate = new Date();
-    checkDate.setHours(0, 0, 0, 0);
-
-    // Normalize yesterday's date
-    const yesterday = new Date(checkDate);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    // Get today's and yesterday's string
-    const dateToString = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const todayStr = dateToString(checkDate);
-    const yesterdayStr = dateToString(yesterday);
-
-    // Determine starting point
-    if (dateSet.has(todayStr)) {
-        streak = 1;
-        checkDate.setDate(checkDate.getDate() - 1); // Start checking from yesterday
-    } else if (dateSet.has(yesterdayStr)) {
-        // If today is a gap but yesterday was checked, streak is 0 (it broke), 
-        // but for display, we show 0 days if today is missed. 
-        // We only check continuity up to yesterday if today is missed.
-        streak = 0; // If today is missed, the streak is over.
-        streakCounter.textContent = `连续打卡: 0 天 (昨天断了 😔)`;
-        return;
-    } else {
-        streak = 0;
-    }
-    
-    // Check backwards from the relevant date
-    while (true) {
-        const dateStr = dateToString(checkDate);
+    if (year === today.getFullYear() && month === today.getMonth()) {
+        let streak = 0;
+        let checkDate = new Date(today); 
         
-        if (dateSet.has(dateStr)) {
-            streak++;
-            checkDate.setDate(checkDate.getDate() - 1); // Go to previous day
-        } else {
-            break; // Gap found
-        }
-    }
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = dateToString(yesterday);
 
-    streakCounter.textContent = `连续打卡: ${streak} 天 🎉`;
+        if (dateSet.has(todayStr)) {
+            streak = 1;
+            checkDate.setDate(checkDate.getDate() - 1); 
+        } else if (dateSet.has(yesterdayStr)) {
+            streak = 0; 
+            streakCounter.textContent = `连续打卡: 0 天 (今天断了 😔)`;
+            return;
+        } else {
+            streak = 0;
+        }
+        
+        while (true) {
+            const dateStr = dateToString(checkDate);
+            if (dateSet.has(dateStr)) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1); 
+            } else {
+                break; 
+            }
+        }
+
+        streakCounter.textContent = `连续打卡: ${streak} 天 🎉`;
+    } else {
+    }
 }
 
 
+calendarButton.addEventListener('click', () => {
+    if (fp) {
+        fp.setDate(new Date(), true); // true: trigger change event
+    }
+    calendarPopup.classList.remove('hidden');
+});
+closeCalendar.addEventListener('click', () => calendarPopup.classList.add('hidden'));
+
 function checkAndDisplayCalendarOnLoad() {
-    const today = new Date().toDateString(); // e.g., "Fri Nov 01 2025"
+    initializeFlatpickr(); // initialize Flatpickr
+
+    const today = new Date().toDateString(); 
     const lastDisplayDate = localStorage.getItem('lastCalendarDisplayDate');
 
-    // Load calendar data regardless of auto-display, so manual click is fast
-    loadUsageCalendar(); 
-
     if (lastDisplayDate !== today) {
-        // This is the first visit of the day
         document.getElementById('calendar-popup').classList.remove('hidden');
         localStorage.setItem('lastCalendarDisplayDate', today);
     }
 }
 
-window.addEventListener('load', checkAndDisplayCalendarOnLoad);// async function loadUsageCalendar() {
-//     // Note: Assuming /usage_log returns an array of date strings, e.g., ["2025-11-01", "2025-10-31"]
-//     const dates = await fetch("/usage_log")
-//         .then(res => res.json())
-//         .catch(() => []); // Handle error gracefully, default to empty array
-
-//     console.log("已使用日期：", dates);
-
-//     calendarDays.innerHTML = '';
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0); // Normalize 'today' to start of day
-
-//     const year = today.getFullYear();
-//     const month = today.getMonth(); // 0-indexed
-
-//     // Calculate the day of the week for the 1st of the month (0=Sunday, 6=Saturday)
-//     const firstDayOfWeek = new Date(year, month, 1).getDay(); 
-//     const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-//     // 1. Add empty cells for preceding days in the first week
-//     for(let i = 0; i < firstDayOfWeek; i++){
-//         const emptyCell = document.createElement('div');
-//         emptyCell.className = 'calendar-day-cell bg-transparent shadow-none'; // Use transparent background for padding
-//         calendarDays.appendChild(emptyCell);
-//     }
-
-//     // 2. Add day cells
-//     for(let d = 1; d <= daysInMonth; d++){
-//         const cell = document.createElement('div');
-//         cell.textContent = d;
-//         cell.className = 'calendar-day-cell'; // Apply base style
-
-//         // Construct date string for comparison
-//         const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        
-//         // Check if the date is a used day (checked in)
-//         if(dates.includes(dateStr)) {
-//             cell.classList.add('used-day');
-//         }
-
-//         // Check if the date is today
-//         if(d === today.getDate()) {
-//             cell.classList.add('today');
-//         }
-        
-//         calendarDays.appendChild(cell);
-//     }
-// }
-
+window.addEventListener('load', checkAndDisplayCalendarOnLoad);
 </script>
 </body>
 </html>
