@@ -116,7 +116,6 @@ For every response, provide each sentence or phrase in this structure:
 - English: [Translation]
 
 - Keep responses clear, concise, and easy to follow.
-- Do not bold text or add unnecessary formatting.
 - Always remain friendly and encouraging.
 """
 

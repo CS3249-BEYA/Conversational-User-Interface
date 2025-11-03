@@ -1,5 +1,6 @@
 import time
 import logging
+import re
 from typing import Dict, List
 
 from .config import SYSTEM_PROMPT
@@ -40,7 +41,8 @@ class ChatEngine:
 
         model_response = self._generate_response(user_input, include_context)
         output_moderation = self._moderate_output(
-            user_input, model_response["response"])
+            user_input, model_response["response"]
+        )
 
         final_response = self._prepare_final_response(
             user_input=user_input,
@@ -49,8 +51,13 @@ class ChatEngine:
             output_moderation=output_moderation,
         )
 
+        # Add disclaimer if applicable
         if disclaimer:
             final_response["response"] = f"{disclaimer}\n\n---\n\n{final_response['response']}"
+
+        # 🔹 Clean and format AI response (Markdown → HTML)
+        final_response["response"] = self._format_ai_response(
+            final_response["response"])
 
         self._update_history(user_input, final_response["response"])
         final_response["latency_ms"] = int((time.time() - start_time) * 1000)
@@ -66,8 +73,11 @@ class ChatEngine:
 
     def _generate_response(self, user_input: str, include_context: bool) -> Dict:
         try:
-            context = self.conversation_history[-5:
-                                                ] if include_context and self.conversation_history else None
+            context = (
+                self.conversation_history[-5:]
+                if include_context and self.conversation_history
+                else None
+            )
             return self.model.generate(
                 prompt=user_input,
                 system_prompt=SYSTEM_PROMPT,
@@ -82,19 +92,37 @@ class ChatEngine:
                 "deterministic": False,
             }
 
-    def _moderate_output(self, user_input: str, model_response: str) -> ModerationResult:
-        return self.moderator.moderate(user_prompt=user_input, model_response=model_response)
+    def _moderate_output(
+        self, user_input: str, model_response: str
+    ) -> ModerationResult:
+        return self.moderator.moderate(
+            user_prompt=user_input, model_response=model_response
+        )
 
     def _prepare_final_response(
-        self, user_input: str, model_response: Dict, input_moderation: ModerationResult, output_moderation: ModerationResult
+        self,
+        user_input: str,
+        model_response: Dict,
+        input_moderation: ModerationResult,
+        output_moderation: ModerationResult,
     ) -> Dict:
         if input_moderation.action == ModerationAction.BLOCK:
             final_action = "block"
-            final_text = input_moderation.fallback_response or "I cannot assist with that request."
+            final_text = (
+                input_moderation.fallback_response
+                or "I cannot assist with that request."
+            )
             policy_tags = input_moderation.tags
-        elif input_moderation.action == ModerationAction.SAFE_FALLBACK or output_moderation.action == ModerationAction.SAFE_FALLBACK:
+        elif (
+            input_moderation.action == ModerationAction.SAFE_FALLBACK
+            or output_moderation.action == ModerationAction.SAFE_FALLBACK
+        ):
             final_action = "safe_fallback"
-            final_text = input_moderation.fallback_response or output_moderation.fallback_response or "Let me rephrase my response."
+            final_text = (
+                input_moderation.fallback_response
+                or output_moderation.fallback_response
+                or "Let me rephrase my response."
+            )
             policy_tags = input_moderation.tags or output_moderation.tags
         else:
             final_action = "allow"
@@ -109,6 +137,32 @@ class ChatEngine:
             "model_name": model_response.get("model", "unknown"),
             "deterministic": model_response.get("deterministic", False),
         }
+
+    def _format_ai_response(self, text: str) -> str:
+        """Clean and format AI response (Markdown → HTML)."""
+        if not text:
+            return text
+
+        # Handle multiline code blocks first
+        text = re.sub(r"```(.*?)```", r"<pre><code>\1</code></pre>",
+                      text, flags=re.DOTALL)
+
+        # Inline code
+        text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
+
+        # Bold (**bold**)
+        text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
+
+        # Italic (*italic*)
+        text = re.sub(r"(?<!\*)\*(?!\*)(.*?)\*(?<!\*)", r"<i>\1</i>", text)
+
+        # Links [text](url)
+        text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', text)
+
+        # Replace newlines with <br> for HTML display
+        text = text.replace("\n", "<br>")
+
+        return text
 
     def _update_history(self, user_input: str, assistant_response: str):
         # Add new messages
@@ -129,9 +183,11 @@ class ChatEngine:
             model_response={"response": "",
                             "model": "blocked", "deterministic": True},
             input_moderation=ModerationResult(
-                action=ModerationAction.BLOCK, tags=[], reason="", confidence=0.0),
+                action=ModerationAction.BLOCK, tags=[], reason="", confidence=0.0
+            ),
             output_moderation=ModerationResult(
-                action=ModerationAction.ALLOW, tags=[], reason="", confidence=0.0),
+                action=ModerationAction.ALLOW, tags=[], reason="", confidence=0.0
+            ),
         )
         if disclaimer:
             response["response"] = f"{disclaimer}\n\n---\n\n{response['response']}"
@@ -144,12 +200,17 @@ class ChatEngine:
     def _handle_safe_fallback(self, user_input: str, start_time: float, disclaimer: str):
         response = self._prepare_final_response(
             user_input=user_input,
-            model_response={"response": "",
-                            "model": "safe_fallback", "deterministic": True},
+            model_response={
+                "response": "",
+                "model": "safe_fallback",
+                "deterministic": True,
+            },
             input_moderation=ModerationResult(
-                action=ModerationAction.SAFE_FALLBACK, tags=[], reason="", confidence=0.0),
+                action=ModerationAction.SAFE_FALLBACK, tags=[], reason="", confidence=0.0
+            ),
             output_moderation=ModerationResult(
-                action=ModerationAction.ALLOW, tags=[], reason="", confidence=0.0),
+                action=ModerationAction.ALLOW, tags=[], reason="", confidence=0.0
+            ),
         )
         if disclaimer:
             response["response"] = f"{disclaimer}\n\n---\n\n{response['response']}"
