@@ -176,12 +176,6 @@ def submit_profile():
         print(f"Error submitting profile: {e}")
         return jsonify({"message": "Error saving profile."}), 500
 
-
-# @app.route("/chat_interface")
-# def chat_interface():
-#     """Serves the main chat interface HTML page."""
-#     return render_template('chat.html')
-
 @app.route("/chat_interface")
 def chat_interface():
     """Serves the main chat interface HTML page."""
@@ -189,7 +183,7 @@ def chat_interface():
         save_usage_date()
     except Exception as e:
         print(f"⚠️ Failed to record usage date: {e}")
-    return render_template('chat.html')
+    return render_template('chat_with_sidepanel.html')
 
 @app.route("/usage_log")
 def usage_log():

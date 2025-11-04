@@ -13,18 +13,49 @@ body {
     font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #f0f4ff 0%, #e0f7ff 100%);
     margin: 0;
+    /* Use full viewport for the new layout */
+    height: 100vh; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-.chat-container {
-    max-width: 700px;
-    margin: 2rem auto;
+
+/* --- Main Layout Container --- */
+.app-container {
+    display: flex; /* Activate Flexbox */
+    width: 90vw; /* Use most of the screen width */
+    max-width: 1200px; /* Limit overall size */
+    height: 90vh; /* Use most of the screen height */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    background-color: #ffffff; /* Background for entire app */
+}
+
+/* --- Side Panel Styles --- */
+.side-panel {
+    width: 250px; /* Fixed width for the sidebar */
+    background-color: #2563eb; /* Primary color for panel */
+    color: white;
+    padding: 2rem 1.5rem;
     display: flex;
     flex-direction: column;
-    height: 85vh;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0; /* Prevents shrinking */
+}
+
+/* --- Chat Panel Styles --- */
+.chat-container {
+    flex-grow: 1; /* Takes up the remaining space */
+    display: flex;
+    flex-direction: column;
     background-color: #ffffff;
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    overflow: hidden;
-    /* padding-top: 1.5rem; */
+    height: 100%;
+    max-width: none; /* Override old max-width */
+    margin: 0; /* Remove old margin */
+    border-radius: 0; /* Remove old border-radius */
+    box-shadow: none; /* Remove old box-shadow */
 }
 .chat-header {
     background-color: #2563eb;
@@ -33,6 +64,7 @@ body {
     text-align: center;
     font-weight: 600;
     position: relative;
+    /* Removed custom padding-left/right since all is in the side panel */
 }
 .chat-messages {
     flex-grow: 1;
@@ -93,7 +125,7 @@ body {
 #send-button {
     margin-left: 0.75rem;
     padding: 0.6rem 1.5rem;
-    background-color: #2563eb;
+    background-color: #0258cc;
     color: white;
     font-weight: 600;
     border-radius: 9999px;
@@ -106,7 +138,7 @@ body {
 #clear-button {
     margin-left: 0.5rem;
     padding: 0.6rem 1.2rem;
-    background-color: #ef4444;
+    background-color: #cc0258;
     color: white;
     font-weight: 600;
     border-radius: 9999px;
@@ -119,7 +151,7 @@ body {
 #mic-button {
     margin-left: 0.5rem;
     padding: 0.6rem 1.2rem;
-    background-color: #10b981;
+    background-color: #58cc02;
     color: white;
     font-weight: 600;
     border-radius: 9999px;
@@ -287,10 +319,8 @@ body {
 }
 /* Flatpickr */
 .flatpickr-calendar {
-    /* remove original flatpickr border and shadow */
     border: none !important;
     box-shadow: none !important;
-    /* ensure it's in popup */
     position: relative !important;
     display: block !important;
     margin: 0 auto;
@@ -314,80 +344,87 @@ body {
 </style>
 </head>
 <body>
-<div class="chat-container">
-    <div class="chat-header">
-        Chinese Language Practise Chatbot 🌏
-        <p class="text-sm mt-1 font-normal">Practice Mandarin with pinyin, translation, and grammar tips</p>
+<div class="app-container">
 
-        <div class="calendar-container absolute top-4 right-4 z-10 flex flex-col items-end space-y-2">
-            <div id="streak-display" class="bg-green-100 text-green-700 font-semibold rounded-full px-3 py-1 shadow-sm text-sm">
+    <div class="side-panel">
+        <div class="profile-section">
+            <h3 class="text-xl font-bold mb-3 text-white">Your Progress 🚀</h3>
+            
+            <div id="streak-display-side" class="bg-green-100 text-green-700 font-semibold rounded-lg px-3 py-2 shadow-md text-sm mb-4 text-center">
                 🌟 Loading...
             </div>
-            <button id="calendar-button" class="px-3 py-1 bg-yellow-400 text-white rounded-full shadow hover:bg-yellow-500 font-semibold text-base">
-                📅 Calendar
+            <button id="calendar-button-side" class="w-full px-3 py-2 bg-green-100 text-green-700 rounded-lg shadow font-semibold text-base transition duration-150 ease-in-out hover:bg-green-200 hover:text-green-800">
+                📅 View Calendar
             </button>
         </div>
+    </div>
 
-        <div id="calendar-popup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm relative">
-                <h3 class="text-xl font-bold mb-4 text-center text-gray-800">Practice Streak 💪</h3>          
-                <input type="text" id="flatpickr-hidden-input" style="position: absolute; left: -9999px;">
-                <div id="flatpickr-container"></div>
-                <div id="day-of-week-labels" class="grid grid-cols-7 gap-2 mb-2">
-                    <div class="day-of-week">Sun</div>
-                    <div class="day-of-week">Mon</div>
-                    <div class="day-of-week">Tue</div>
-                    <div class="day-of-week">Wed</div>
-                    <div class="day-of-week">Thu</div>
-                    <div class="day-of-week">Fri</div>
-                    <div class="day-of-week">Sat</div>
+    <div class="chat-container">
+        <div class="chat-header">
+            Chinese Language Practise Chatbot 🌏
+            <p class="text-sm mt-1 font-normal">Practice Mandarin with pinyin, translation, and grammar tips</p>
+        </div>
+        
+        <div id="chat-messages" class="chat-messages">
+            <div id="empty-state" class="empty-state-container">
+                <h2 class="text-2xl font-bold text-gray-800">Welcome! What would you like to practice today?</h2>
+                <p class="text-gray-500 mt-2">Click on a scenario below to start practicing.</p>
+                <div class="topic-cards-grid">
+                    <button class="starter-card" data-prompt="Let's practice ordering food in a restaurant." data-type="scenario-starter">
+                        <span class="card-icon">🍜</span>
+                        <span class="card-title">Ordering Food</span>
+                        <span class="card-subtitle">Practice restaurant conversations</span>
+                    </button>
+                    <button class="starter-card" data-prompt="Let's practice asking for directions." data-type="scenario-starter">
+                        <span class="card-icon">🗺️</span>
+                        <span class="card-title">Asking Directions</span>
+                        <span class="card-subtitle">Navigate around the city</span>
+                    </button>
+                    <button class="starter-card" data-prompt="Let's practice shopping dialogues." data-type="scenario-starter">
+                        <span class="card-icon">🛍️</span>
+                        <span class="card-title">Shopping</span>
+                        <span class="card-subtitle">Practice buying clothes or groceries</span>
+                    </button>
+                    <button class="starter-card" data-prompt="Let's practice introducing yourself and meeting new people." data-type="scenario-starter">
+                        <span class="card-icon">👋</span>
+                        <span class="card-title">Meeting People</span>
+                        <span class="card-subtitle">Greetings and self-introduction</span>
+                    </button>
                 </div>
-                
-                <div id="calendar-days" class="grid grid-cols-7 gap-2">
-                </div>
-                
-                <button id="close-calendar" class="absolute top-3 right-3 text-xl text-gray-500 hover:text-gray-800 focus:outline-none">
-                    &times;
-                </button>
+                <p class="small-text text-gray-400 mt-4">You can also just type the scenario you want to practice below.</p>
             </div>
         </div>
-
-    </div>
-    
-    <div id="chat-messages" class="chat-messages">
-        <div id="empty-state" class="empty-state-container">
-            <h2 class="text-2xl font-bold text-gray-800">Welcome! What would you like to practice today?</h2>
-            <p class="text-gray-500 mt-2">Click on a scenario below to start practicing.</p>
-            <div class="topic-cards-grid">
-                <button class="starter-card" data-prompt="Let's practice ordering food in a restaurant." data-type="scenario-starter">
-                    <span class="card-icon">🍜</span>
-                    <span class="card-title">Ordering Food</span>
-                    <span class="card-subtitle">Practice restaurant conversations</span>
-                </button>
-                <button class="starter-card" data-prompt="Let's practice asking for directions." data-type="scenario-starter">
-                    <span class="card-icon">🗺️</span>
-                    <span class="card-title">Asking Directions</span>
-                    <span class="card-subtitle">Navigate around the city</span>
-                </button>
-                <button class="starter-card" data-prompt="Let's practice shopping dialogues." data-type="scenario-starter">
-                    <span class="card-icon">🛍️</span>
-                    <span class="card-title">Shopping</span>
-                    <span class="card-subtitle">Practice buying clothes or groceries</span>
-                </button>
-                <button class="starter-card" data-prompt="Let's practice introducing yourself and meeting new people." data-type="scenario-starter">
-                    <span class="card-icon">👋</span>
-                    <span class="card-title">Meeting People</span>
-                    <span class="card-subtitle">Greetings and self-introduction</span>
-                </button>
-            </div>
-            <p class="small-text text-gray-400 mt-4">You can also just type the scenario you want to practice below.</p>
+        <div class="input-area">
+            <input id="user-input" type="text" placeholder="Type a sentence, ask for translation, or grammar tips..." autocomplete="off"/>
+            <button id="mic-button">🎤</button>
+            <button id="send-button">Send</button>
+            <button id="clear-button">Clear Chat</button>
         </div>
     </div>
-    <div class="input-area">
-        <input id="user-input" type="text" placeholder="Type a sentence, ask for translation, or grammar tips..." autocomplete="off"/>
-        <button id="mic-button">🎤</button>
-        <button id="send-button">Send</button>
-        <button id="clear-button">Clear Chat</button>
+
+</div>
+
+<div id="calendar-popup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm relative">
+        <h3 class="text-xl font-bold mb-4 text-center text-gray-800">Practice Streak 💪</h3>         
+        <input type="text" id="flatpickr-hidden-input" style="position: absolute; left: -9999px;">
+        <div id="flatpickr-container"></div>
+        <div id="day-of-week-labels" class="grid grid-cols-7 gap-2 mb-2">
+            <div class="day-of-week">Sun</div>
+            <div class="day-of-week">Mon</div>
+            <div class="day-of-week">Tue</div>
+            <div class="day-of-week">Wed</div>
+            <div class="day-of-week">Thu</div>
+            <div class="day-of-week">Fri</div>
+            <div class="day-of-week">Sat</div>
+        </div>
+        
+        <div id="calendar-days" class="grid grid-cols-7 gap-2">
+        </div>
+        
+        <button id="close-calendar" class="absolute top-3 right-3 text-xl text-gray-500 hover:text-gray-800 focus:outline-none">
+            &times;
+        </button>
     </div>
 </div>
 
@@ -599,17 +636,17 @@ micButton.addEventListener('click', () => {
 });
 
 /* ===== FLATPICKR INTEGRATION & CALENDAR LOGIC ===== */
-const calendarButton = document.getElementById('calendar-button');
+// UPDATE IDs to match the side panel
+const calendarButton = document.getElementById('calendar-button-side'); 
+const streakDisplay = document.getElementById('streak-display-side');
 const calendarPopup = document.getElementById('calendar-popup');
 const closeCalendar = document.getElementById('close-calendar');
 const calendarDays = document.getElementById('calendar-days');
-const streakCounter = document.getElementById('streak-counter');
 const flatpickrContainer = document.getElementById('flatpickr-container');
 
 let fp;
 
 function initializeFlatpickr() {
-    // add Flatpickr to hidden input
     fp = flatpickr("#flatpickr-hidden-input", {
         inline: true, 
         appendTo: flatpickrContainer, 
@@ -618,15 +655,12 @@ function initializeFlatpickr() {
         onChange: function(selectedDates, dateStr, instance) {
         },
         onMonthChange: function(selectedDates, dateStr, instance) {
-            // update calendar grid on month change
             loadCustomCalendar(instance.currentYear, instance.currentMonth);
         },
         onYearChange: function(selectedDates, dateStr, instance) {
-            // update calendar grid on year change
             loadCustomCalendar(instance.currentYear, instance.currentMonth);
         },
         onReady: function(selectedDates, dateStr, instance) {
-             // update calendar grid on initial load
             loadCustomCalendar(instance.currentYear, instance.currentMonth);
         }
     });
@@ -687,7 +721,7 @@ async function loadCustomCalendar(year, month) {
             checkDate.setDate(checkDate.getDate() - 1); 
         } else if (dateSet.has(yesterdayStr)) {
             streak = 0; 
-            document.getElementById("streak-display").textContent = `Streak: 0 Day (😔)`;
+            streakDisplay.textContent = `Streak: 0 Day (😔)`;
             return;
         } else {
             streak = 0;
@@ -703,8 +737,9 @@ async function loadCustomCalendar(year, month) {
             }
         }
 
-        document.getElementById("streak-display").textContent = `🔥 ${streak}-Day Streak! 🎉`;
+        streakDisplay.textContent = `🔥 ${streak}-Day Streak! 🎉`;
     } else {
+        // You might want to update the streak display only if viewing the current month
     }
 }
 
@@ -718,8 +753,10 @@ calendarButton.addEventListener('click', () => {
 closeCalendar.addEventListener('click', () => calendarPopup.classList.add('hidden'));
 
 function checkAndDisplayCalendarOnLoad() {
-    initializeFlatpickr(); // initialize Flatpickr
-
+    initializeFlatpickr(); 
+    // Removed the automatic calendar popup on load for better UX in a sidebar design
+    // You can uncomment the old logic here if you want it to pop up once a day:
+    /*
     const today = new Date().toDateString(); 
     const lastDisplayDate = localStorage.getItem('lastCalendarDisplayDate');
 
@@ -727,6 +764,7 @@ function checkAndDisplayCalendarOnLoad() {
         document.getElementById('calendar-popup').classList.remove('hidden');
         localStorage.setItem('lastCalendarDisplayDate', today);
     }
+    */
 }
 
 window.addEventListener('load', checkAndDisplayCalendarOnLoad);
