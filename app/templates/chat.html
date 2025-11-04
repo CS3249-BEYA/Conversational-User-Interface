@@ -402,6 +402,8 @@ const micButton = document.getElementById('mic-button');
 const emptyState = document.getElementById('empty-state');
 const starterCards = document.querySelectorAll('.starter-card');
 
+let currentAudio = null; // global variable to track TTS playback
+
 starterCards.forEach(card => {
     card.addEventListener('click', handlePromptClick);
 });
@@ -459,7 +461,9 @@ async function speak(text, speakBtn) {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
+        currentAudio = audio; // store audio reference
         audio.onended = () => {
+            currentAudio = null;
             if (speakBtn) {
                 speakBtn.disabled = false;
                 speakBtn.textContent = '🔊 Speak';
@@ -538,6 +542,13 @@ clearButton.addEventListener('click', () => {
     const userConfirmed = confirm("Are you sure you want to clear the chat? This cannot be undone.");
     if (userConfirmed) {
         clearChat();
+    }
+
+    // stop TTS playback
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
     }
 });
 
