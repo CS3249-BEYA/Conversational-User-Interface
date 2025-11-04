@@ -497,6 +497,12 @@ function hideLoading() {
 async function sendMessage() {
     const prompt = userInput.value.trim();
     if(!prompt) return;
+
+    // stop microphone if recording
+    if (isRecording && recognition) {
+        recognition.stop();
+    }
+
     appendMessage(prompt, 'user-message');
     userInput.value = '';
     showLoading();
@@ -519,10 +525,22 @@ function clearChat() {
     chatMessages.innerHTML = '';
     chatMessages.appendChild(emptyState);
     emptyState.style.display = 'flex';
+
+    // stop microphone if recording
+    if (isRecording && recognition) {
+        recognition.stop();
+    }
 }
 
 sendButton.addEventListener('click', sendMessage);
-clearButton.addEventListener('click', clearChat);
+// clearButton.addEventListener('click', clearChat);
+clearButton.addEventListener('click', () => {
+    const userConfirmed = confirm("Are you sure you want to clear the chat? This cannot be undone.");
+    if (userConfirmed) {
+        clearChat();
+    }
+});
+
 userInput.addEventListener('keypress', e => { if(e.key==='Enter') sendMessage(); });
 
 /* ===== Speech Recognition (Audio Input) ===== */
@@ -532,7 +550,7 @@ let isRecording = false;
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
-    recognition.lang = 'en-US,zh-CN';
+    recognition.lang = 'zh-CN';
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
     recognition.continuous = true;

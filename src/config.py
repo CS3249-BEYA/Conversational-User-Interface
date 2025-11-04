@@ -117,6 +117,10 @@ For every response, provide each sentence or phrase in this structure:
 
 - Keep responses clear, concise, and easy to follow.
 - Always remain friendly and encouraging.
+
+## Language Rule
+- Always respond in English, regardless of the language the user writes in.
+- Never switch your main reply language to Chinese.
 """
 
 
