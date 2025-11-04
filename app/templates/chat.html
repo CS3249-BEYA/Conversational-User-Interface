@@ -431,11 +431,11 @@ function appendMessage(text, type, autoplay=false) {
         const speakBtn = document.createElement('button');
         speakBtn.textContent = '🔊 Speak';
         speakBtn.className = 'px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600';
-        speakBtn.onclick = () => speak(text);
+        speakBtn.onclick = () => speak(text, speakBtn);
         box.appendChild(speakBtn);
 
         if (autoplay) {
-            speak(text);
+            speak(text, speakBtn);
         }
     }
     row.appendChild(box);
@@ -446,6 +446,10 @@ function appendMessage(text, type, autoplay=false) {
 async function speak(text) {
     const chineseOnly = text.match(/[\u4e00-\u9fff]+/g)?.join(" ");
     if (!chineseOnly) return;
+    if (speakBtn) {
+        speakBtn.disabled = true;
+        speakBtn.textContent = '🎶 Playing...';
+    }
     try {
         const res = await fetch('/speak', {
             method: 'POST',
@@ -455,9 +459,19 @@ async function speak(text) {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
+        audio.onended = () => {
+            if (speakBtn) {
+                speakBtn.disabled = false;
+                speakBtn.textContent = '🔊 Speak';
+            }
+        };
         audio.play();
     } catch (err) {
         console.error("Error playing TTS:", err);
+        if (speakBtn) {
+            speakBtn.disabled = false;
+            speakBtn.textContent = '🔊 Speak';
+        }
     }
 }
 
@@ -518,9 +532,10 @@ let isRecording = false;
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
-    recognition.lang = 'zh-CN';
+    recognition.lang = 'en-US,zh-CN';
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
+    recognition.continuous = true;
 
     recognition.onstart = () => {
         isRecording = true;
@@ -538,6 +553,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             transcript += event.results[i][0].transcript;
         }
         userInput.value = transcript;
+        userInput.scrollLeft = userInput.scrollWidth;
     };
 } else {
     micButton.disabled = true;
