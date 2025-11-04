@@ -443,7 +443,7 @@ function appendMessage(text, type, autoplay=false) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-async function speak(text) {
+async function speak(text, speakBtn) {
     const chineseOnly = text.match(/[\u4e00-\u9fff]+/g)?.join(" ");
     if (!chineseOnly) return;
     if (speakBtn) {
