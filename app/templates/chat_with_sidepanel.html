@@ -539,6 +539,9 @@ async function sendMessage() {
     const prompt = userInput.value.trim();
     if(!prompt) return;
 
+    // Disable send button and input to prevent multiple submissions
+    sendButton.disabled = true;
+
     // stop microphone if recording
     if (isRecording && recognition) {
         recognition.stop();
@@ -559,6 +562,9 @@ async function sendMessage() {
     } catch(e) {
         hideLoading();
         appendMessage('An error occurred. Please try again later.', 'blocked-message');
+    } finally {
+        // Re-enable send button and input field after processing
+        sendButton.disabled = false;
     }
 }
 
@@ -589,7 +595,17 @@ clearButton.addEventListener('click', () => {
     }
 });
 
-userInput.addEventListener('keypress', e => { if(e.key==='Enter') sendMessage(); });
+userInput.addEventListener('keypress', e => {
+    // Check if Enter key is pressed
+    if (e.key === 'Enter') {
+        // Prevent sending message if sendButton is disabled
+        if (sendButton.disabled) {
+            e.preventDefault();  // Prevent form submission or message send
+        } else {
+            sendMessage();  // Send the message if button is enabled
+        }
+    }
+});
 
 /* ===== Speech Recognition (Audio Input) ===== */
 let recognition;
